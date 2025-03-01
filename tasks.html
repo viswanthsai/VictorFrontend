@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Tasks - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <script src="js/task-utils.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 pt-16">
+  <!-- Header with improved navigation -->
+  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl flex items-center" href="index.html">
+          <span class="bg-primary text-white p-1 rounded mr-1">V</span>ictor
+        </a>
+        
+        <button class="md:hidden text-gray-500 focus:outline-none" type="button" id="mobile-menu-button">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        
+        <div class="hidden md:flex items-center space-x-1" id="navbar-menu">
+          <a class="px-4 py-2 text-gray-700 font-medium hover:text-primary rounded-md transition-colors" href="index.html">
+            <i class="fas fa-home mr-1"></i> Home
+          </a>
+          <a class="px-4 py-2 text-primary font-medium bg-primary-light rounded-md transition-colors" href="tasks.html">
+            <i class="fas fa-list-ul mr-1"></i> Browse Tasks
+          </a>
+          <a class="px-4 py-2 text-gray-700 font-medium hover:text-primary rounded-md transition-colors" href="post-task.html">
+            <i class="fas fa-plus-circle mr-1"></i> Post a Task
+          </a>
+          
+          <!-- Login/Signup options (visible when logged out) -->
+          <div class="ml-2 flex items-center space-x-1">
+            <a class="px-4 py-2 text-gray-700 font-medium hover:text-primary rounded-md transition-colors" href="login.html" id="login-menu-item">
+              <i class="fas fa-sign-in-alt mr-1"></i> Login
+            </a>
+            <a class="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors" href="signup.html" id="signup-menu-item">
+              <i class="fas fa-user-plus mr-1"></i> Sign Up
+            </a>
+          </div>
+          
+          <!-- User dropdown (hidden by default, shown when logged in) -->
+          <div class="relative hidden ml-2" id="user-menu-item">
+            <button class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors" id="user-menu-button">
+              <i class="fas fa-user-circle text-primary mr-2"></i>
+              <span id="username-display" class="font-medium">User</span>
+              <i class="fas fa-chevron-down ml-2 text-xs text-gray-500"></i>
+            </button>
+            <div class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-10 hidden border border-gray-100" id="user-dropdown">
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="dashboard.html">
+                <i class="fas fa-tachometer-alt w-5 mr-2 text-gray-400"></i> Dashboard
+              </a>
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="profile.html">
+                <i class="fas fa-user w-5 mr-2 text-gray-400"></i> My Profile
+              </a>
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="accepted-tasks.html">
+                <i class="fas fa-check-circle w-5 mr-2 text-gray-400"></i> Tasks I'm Working On
+              </a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="#" id="logout-button">
+                <i class="fas fa-sign-out-alt w-5 mr-2 text-gray-400"></i> Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+    
+    <!-- Mobile menu (hidden by default) -->
+    <div class="md:hidden bg-white border-t border-gray-100 px-4 py-2 hidden" id="mobile-nav">
+      <div class="flex flex-col space-y-1">
+        <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md" href="index.html">Home</a>
+        <a class="px-2 py-2 bg-primary-light text-primary rounded-md" href="tasks.html">Browse Tasks</a>
+        <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md" href="post-task.html">Post a Task</a>
+        <div class="border-t border-gray-100 my-1"></div>
+        <div id="mobile-login-links">
+          <a class="block px-2 py-2 text-gray-700 hover:text-primary rounded-md" href="login.html">Log In</a>
+          <a class="block px-2 py-2 text-primary font-medium" href="signup.html">Create an Account</a>
+        </div>
+        <div id="mobile-user-links" class="hidden">
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="dashboard.html">
+            <i class="fas fa-tachometer-alt w-5 mr-2 text-gray-400"></i> Dashboard
+          </a>
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="profile.html">
+            <i class="fas fa-user w-5 mr-2 text-gray-400"></i> My Profile
+          </a>
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="accepted-tasks.html">
+            <i class="fas fa-check-circle w-5 mr-2 text-gray-400"></i> Tasks I'm Working On
+          </a>
+          <div class="border-t border-gray-100 my-1"></div>
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="#" id="mobile-logout-button">
+            <i class="fas fa-sign-out-alt w-5 mr-2 text-gray-400"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow py-8">
+    <div class="container mx-auto px-4">
+      <!-- Hero section with background -->
+      <div class="mb-10 bg-gradient-to-r from-primary to-blue-600 rounded-xl p-8 text-white">
+        <div class="max-w-3xl">
+          <h1 class="text-4xl font-bold mb-3">Find Tasks That Match Your Skills</h1>
+          <p class="text-lg opacity-90 mb-6">Browse through available tasks, apply your skills, and earn money helping others.</p>
+          
+          <!-- Search bar integrated in hero section -->
+          <div class="relative w-full max-w-xl">
+            <input 
+              type="text" 
+              id="quick-search" 
+              placeholder="Quick search for tasks..." 
+              class="w-full pr-10 pl-4 py-3 rounded-lg bg-white bg-opacity-90 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+            >
+            <button class="absolute right-3 top-3 text-gray-600">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex flex-col lg:flex-row lg:gap-8">
+        <!-- Left sidebar for filters -->
+        <div class="w-full lg:w-80 mb-6 lg:mb-0">
+          <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+            <h3 class="text-lg font-bold mb-4 flex items-center">
+              <i class="fas fa-filter mr-2 text-primary"></i> Filter Tasks
+            </h3>
+            
+            <form id="filter-form" class="space-y-5">
+              <!-- Search filter -->
+              <div>
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <div class="relative">
+                  <input type="text" id="search" name="search" placeholder="Keywords..." 
+                    class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Category filter with icons -->
+              <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select id="category" name="category" 
+                  class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary appearance-none bg-no-repeat"
+                  style="background-position: right 0.5rem center; background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236B7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E');"
+                >
+                  <option value="">All Categories</option>
+                  <option value="Delivery">Delivery</option>
+                  <option value="Home Services">Home Services</option>
+                  <option value="IT & Tech">IT & Tech</option>
+                  <option value="Tutoring">Tutoring</option>
+                  <option value="Events">Events</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <!-- Location filter -->
+              <div>
+                <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <div class="relative">
+                  <input type="text" id="location" name="location" placeholder="Any location" 
+                    class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-map-marker-alt text-gray-400"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Budget range slider -->
+              <div>
+                <label for="budget-range" class="block text-sm font-medium text-gray-700 mb-1">Budget Range</label>
+                <div class="px-1">
+                  <input type="range" min="0" max="50000" step="1000" value="50000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary" id="budget-range">
+                  <div class="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Any</span>
+                    <span id="budget-value">Up to ₹50,000</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Sort options -->
+              <div>
+                <label for="sort-by" class="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
+                <select id="sort-by" name="sort-by" 
+                  class="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary appearance-none bg-no-repeat"
+                  style="background-position: right 0.5rem center; background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236B7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3E%3C/svg%3E');"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="price-high">Price High to Low</option>
+                  <option value="price-low">Price Low to High</option>
+                </select>
+              </div>
+              
+              <!-- Filter Actions -->
+              <div class="pt-2 flex space-x-3">
+                <button type="submit" class="flex-1 bg-primary hover:bg-primary-dark text-white px-4 py-2.5 rounded-lg transition-colors flex justify-center items-center">
+                  <i class="fas fa-filter mr-2"></i> Apply
+                </button>
+                <button type="button" id="clear-filters" class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2.5 rounded-lg transition-colors">
+                  Clear All
+                </button>
+              </div>
+            </form>
+            
+            <!-- Post a task CTA -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+              <div class="bg-primary-light rounded-lg p-4 text-center">
+                <h4 class="font-medium text-primary mb-2">Need help with a task?</h4>
+                <p class="text-sm text-gray-600 mb-3">Post your own task and find people with the right skills to help.</p>
+                <a href="post-task.html" class="block bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors">
+                  <i class="fas fa-plus-circle mr-2"></i> Post a Task
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Main content area -->
+        <div class="flex-grow">
+          <!-- Active filters display -->
+          <div id="active-filters" class="flex flex-wrap gap-2 mb-4" style="display: none;"></div>
+          
+          <!-- Tasks summary -->
+          <div class="mb-6 flex flex-wrap items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800">Available Tasks</h2>
+              <p class="text-gray-600 text-sm" id="results-count">Showing all available tasks</p>
+            </div>
+            <div class="flex items-center space-x-2 mt-2 sm:mt-0">
+              <!-- Layout toggle buttons -->
+              <div class="bg-white rounded-md shadow-sm p-1 flex space-x-1">
+                <button class="py-1 px-2 rounded bg-primary-light text-primary" id="grid-layout-btn">
+                  <i class="fas fa-th-large"></i>
+                </button>
+                <button class="py-1 px-2 rounded text-gray-500 hover:bg-gray-100" id="list-layout-btn">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Loading state -->
+          <div id="loading-container" class="bg-white rounded-xl shadow-sm p-12 text-center">
+            <div class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-gray-500">Loading tasks...</p>
+          </div>
+          
+          <!-- Tasks container - Grid layout -->
+          <div id="tasks-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5 hidden"></div>
+          
+          <!-- Tasks container - List layout (hidden by default) -->
+          <div id="tasks-list-container" class="space-y-4 hidden">
+            <!-- List items will be inserted here -->
+          </div>
+          
+          <!-- Empty state -->
+          <div id="empty-container" class="bg-white rounded-xl shadow-sm p-12 text-center hidden">
+            <img src="https://illustrations.popsy.co/amber/no-results-found.svg" alt="No results" class="h-40 mx-auto mb-6">
+            <h3 class="text-xl font-bold mb-2">No Tasks Found</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">We couldn't find any tasks matching your filters. Try adjusting your search criteria or check back later.</p>
+            <button id="reset-search" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg inline-flex items-center">
+              <i class="fas fa-redo mr-2"></i>Reset Search
+            </button>
+          </div>
+          
+          <!-- Error state -->
+          <div id="error-container" class="bg-white rounded-xl shadow-sm p-12 text-center hidden">
+            <img src="https://illustrations.popsy.co/amber/falling.svg" alt="Error" class="h-40 mx-auto mb-6">
+            <h3 class="text-xl font-bold mb-2">Something Went Wrong</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto" id="error-message">We couldn't load the tasks. Please try again later.</p>
+            <button id="retry-button" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg inline-flex items-center">
+              <i class="fas fa-sync-alt mr-2"></i>Try Again
+            </button>
+          </div>
+          
+          <!-- Pagination -->
+          <div id="pagination" class="mt-8 flex justify-center hidden">
+            <div class="inline-flex rounded-md shadow-sm">
+              <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50">
+                <i class="fas fa-chevron-left mr-2"></i> Previous
+              </button>
+              <div class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-t border-b border-gray-300">
+                Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+              </div>
+              <button class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50">
+                Next <i class="fas fa-chevron-right ml-2"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-gray-800 text-white mt-16">
+    <!-- Top footer section -->
+    <div class="container mx-auto px-4 py-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div>
+          <h3 class="text-xl font-bold mb-4">Victor</h3>
+          <p class="text-gray-300 mb-4">Connecting people for tasks - anytime, anywhere.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-gray-300 hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4 text-lg">For Task Posters</h4>
+          <ul class="space-y-2">
+            <li><a href="post-task.html" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Post a Task</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>How it Works</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Pricing</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>FAQ</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4 text-lg">For Task Performers</h4>
+          <ul class="space-y-2">
+            <li><a href="tasks.html" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Browse Tasks</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Task Categories</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Earn Money</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Success Stories</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4 text-lg">Support</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Help Center</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Contact Us</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Privacy Policy</a></li>
+            <li><a href="server-status.html" class="text-gray-300 hover:text-white"><i class="fas fa-angle-right mr-2 text-xs"></i>Server Status</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Copyright footer -->
+    <div class="border-t border-gray-700">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <p class="text-sm text-gray-300">© 2023 Victor - Connect for Tasks. All rights reserved.</p>
+          <div class="mt-3 md:mt-0">
+            <a href="#" class="text-sm text-gray-300 hover:text-white mx-3">Terms of Service</a>
+            <a href="#" class="text-sm text-gray-300 hover:text-white mx-3">Privacy Policy</a>
+            <a href="#" class="text-sm text-gray-300 hover:text-white mx-3">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get API URL from config
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('mobile-nav').classList.toggle('hidden');
+      });
+      
+      // User dropdown toggle
+      const userMenuButton = document.getElementById('user-menu-button');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuButton && userDropdown) {
+        userMenuButton.addEventListener('click', function() {
+          userDropdown.classList.toggle('hidden');
+        });
+  
+        // Close the dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+      
+      // Budget range slider
+      const budgetRange = document.getElementById('budget-range');
+      const budgetValue = document.getElementById('budget-value');
+      
+      if (budgetRange && budgetValue) {
+        budgetRange.addEventListener('input', function() {
+          if (parseInt(this.value) === 0) {
+            budgetValue.textContent = 'Any';
+          } else {
+            budgetValue.textContent = `Up to ₹${parseInt(this.value).toLocaleString()}`;
+          }
+        });
+      }
+      
+      // Layout toggle
+      const gridLayoutBtn = document.getElementById('grid-layout-btn');
+      const listLayoutBtn = document.getElementById('list-layout-btn');
+      const tasksContainer = document.getElementById('tasks-container');
+      const tasksListContainer = document.getElementById('tasks-list-container');
+      
+      if (gridLayoutBtn && listLayoutBtn && tasksContainer && tasksListContainer) {
+        gridLayoutBtn.addEventListener('click', function() {
+          // Switch to grid layout
+          tasksContainer.classList.remove('hidden');
+          tasksListContainer.classList.add('hidden');
+          
+          // Update toggle buttons
+          gridLayoutBtn.classList.add('bg-primary-light', 'text-primary');
+          gridLayoutBtn.classList.remove('text-gray-500', 'hover:bg-gray-100');
+          listLayoutBtn.classList.remove('bg-primary-light', 'text-primary');
+          listLayoutBtn.classList.add('text-gray-500', 'hover:bg-gray-100');
+        });
+        
+        listLayoutBtn.addEventListener('click', function() {
+          // Switch to list layout
+          tasksContainer.classList.add('hidden');
+          tasksListContainer.classList.remove('hidden');
+          
+          // Update toggle buttons
+          listLayoutBtn.classList.add('bg-primary-light', 'text-primary');
+          listLayoutBtn.classList.remove('text-gray-500', 'hover:bg-gray-100');
+          gridLayoutBtn.classList.remove('bg-primary-light', 'text-primary');
+          gridLayoutBtn.classList.add('text-gray-500', 'hover:bg-gray-100');
+        });
+      }
+      
+      // Quick search handler 
+      const quickSearch = document.getElementById('quick-search');
+      const searchInput = document.getElementById('search');
+      
+      if (quickSearch && searchInput) {
+        quickSearch.addEventListener('input', function() {
+          searchInput.value = this.value;
+        });
+        
+        quickSearch.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            searchInput.value = this.value;
+            applyFilters();
+          }
+        });
+      }
+      
+      // Check login status
+      checkLoginStatus();
+      
+      // Setup filter form
+      setupFilterForm();
+      
+      // Check URL for filters
+      loadFiltersFromURL();
+      
+      // Load tasks with initial filters
+      loadTasks();
+      
+      // Set up retry button
+      document.getElementById('retry-button').addEventListener('click', loadTasks);
+      
+      // Set up reset search button
+      document.getElementById('reset-search').addEventListener('click', function() {
+        document.getElementById('filter-form').reset();
+        document.getElementById('budget-range').value = 50000;
+        document.getElementById('budget-value').textContent = 'Up to ₹50,000';
+        quickSearch.value = '';
+        applyFilters();
+      });
+    });
+    
+    // Check login status and update UI
+    function checkLoginStatus() {
+      const isLoggedIn = localStorage.getItem('token') !== null;
+      
+      const loginMenuItem = document.getElementById('login-menu-item');
+      const signupMenuItem = document.getElementById('signup-menu-item');
+      const userMenuItem = document.getElementById('user-menu-item');
+      
+      if (isLoggedIn) {
+        if (loginMenuItem) loginMenuItem.classList.add('hidden');
+        if (signupMenuItem) signupMenuItem.classList.add('hidden');
+        
+        if (userMenuItem) {
+          userMenuItem.classList.remove('hidden');
+          
+          // Display username if available
+          const username = localStorage.getItem('username') || 'User';
+          const usernameDisplay = document.getElementById('username-display');
+          if (usernameDisplay) {
+            usernameDisplay.textContent = username;
+          }
+        }
+        
+        // Setup logout button
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+          logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+          });
+        }
+      } else {
+        if (loginMenuItem) loginMenuItem.classList.remove('hidden');
+        if (signupMenuItem) signupMenuItem.classList.remove('hidden');
+        if (userMenuItem) userMenuItem.classList.add('hidden');
+      }
+    }
+    
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      window.location.href = 'login.html?message=You have been logged out';
+    }
+    
+    // Set up the filter form
+    function setupFilterForm() {
+      const filterForm = document.getElementById('filter-form');
+      const clearFiltersButton = document.getElementById('clear-filters');
+      
+      filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        applyFilters();
+      });
+      
+      clearFiltersButton.addEventListener('click', function() {
+        filterForm.reset();
+        applyFilters();
+      });
+    }
+    
+    // Apply filters and reload tasks
+    function applyFilters() {
+      const searchInput = document.getElementById('search').value.trim();
+      const categorySelect = document.getElementById('category').value;
+      const locationInput = document.getElementById('location').value.trim();
+      const sortBySelect = document.getElementById('sort-by').value;
+      
+      // Build query string for URL
+      const params = new URLSearchParams();
+      if (searchInput) params.append('search', searchInput);
+      if (categorySelect) params.append('category', categorySelect);
+      if (locationInput) params.append('location', locationInput);
+      if (sortBySelect) params.append('sort', sortBySelect);
+      
+      // Update URL without reloading the page
+      const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+      window.history.pushState({ path: newURL }, '', newURL);
+      
+      // Load tasks with the new filters
+      loadTasks();
+    }
+    
+    // Load filters from URL parameters
+    function loadFiltersFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      const searchParam = urlParams.get('search');
+      const categoryParam = urlParams.get('category');
+      const locationParam = urlParams.get('location');
+      const sortParam = urlParams.get('sort');
+      
+      if (searchParam) document.getElementById('search').value = searchParam;
+      if (categoryParam) document.getElementById('category').value = categoryParam;
+      if (locationParam) document.getElementById('location').value = locationParam;
+      if (sortParam) document.getElementById('sort-by').value = sortParam;
+    }
+    
+    // Global tasks array
+    let allTasks = [];
+    
+    // Load tasks from API
+    async function loadTasks() {
+      const loadingContainer = document.getElementById('loading-container');
+      const tasksContainer = document.getElementById('tasks-container');
+      const emptyContainer = document.getElementById('empty-container');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+      const activeFilters = document.getElementById('active-filters');
+      
+      try {
+        // Show loading state
+        loadingContainer.style.display = 'block';
+        tasksContainer.classList.add('hidden');
+        emptyContainer.classList.add('hidden');
+        errorContainer.classList.add('hidden');
+        
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+        
+        // Fetch tasks
+        const response = await fetch(`${API_URL}/api/tasks`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load tasks (${response.status})`);
+        }
+        
+        allTasks = await response.json();
+        
+        // Filter and sort tasks
+        const filteredTasks = filterAndSortTasks(allTasks);
+        
+        // Update active filters display
+        updateActiveFilters();
+        
+        // Hide loading container
+        loadingContainer.style.display = 'none';
+        
+        if (filteredTasks.length === 0) {
+          // Show empty state if no tasks match filters
+          emptyContainer.classList.remove('hidden');
+          return;
+        }
+        
+        // Show and populate tasks container
+        tasksContainer.classList.remove('hidden');
+        renderTasks(filteredTasks);
+        
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+        
+        // Hide loading, show error
+        loadingContainer.style.display = 'none';
+        errorContainer.classList.remove('hidden');
+        
+        if (errorMessage) {
+          errorMessage.textContent = error.message || 'Failed to load tasks. Please try again later.';
+        }
+      }
+    }
+    
+    // Filter and sort tasks
+    function filterAndSortTasks(tasks) {
+      const searchInput = document.getElementById('search').value.toLowerCase().trim();
+      const categorySelect = document.getElementById('category').value;
+      const locationInput = document.getElementById('location').value.toLowerCase().trim();
+      const sortBySelect = document.getElementById('sort-by').value;
+      
+      // Apply filters
+      let filteredTasks = tasks.filter(task => {
+        // Only show open tasks
+        if (task.status !== 'Open') return false;
+        
+        // Search filter
+        if (searchInput) {
+          const searchMatch = 
+            task.title.toLowerCase().includes(searchInput) || 
+            task.description.toLowerCase().includes(searchInput);
+          
+          if (!searchMatch) return false;
+        }
+        
+        // Category filter
+        if (categorySelect && task.category !== categorySelect) {
+          return false;
+        }
+        
+        // Location filter
+        if (locationInput) {
+          const taskLocation = (task.location || 'Remote').toLowerCase();
+          if (!taskLocation.includes(locationInput)) return false;
+        }
+        
+        return true;
+      });
+      
+      // Apply sorting
+      switch (sortBySelect) {
+        case 'oldest':
+          filteredTasks.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          break;
+        case 'price-high':
+          filteredTasks.sort((a, b) => (b.budget || 0) - (a.budget || 0));
+          break;
+        case 'price-low':
+          filteredTasks.sort((a, b) => (a.budget || 0) - (b.budget || 0));
+          break;
+        default: // newest
+          filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      
+      return filteredTasks;
+    }
+    
+    // Update the active filters display
+    function updateActiveFilters() {
+      const activeFilters = document.getElementById('active-filters');
+      const searchInput = document.getElementById('search').value.trim();
+      const categorySelect = document.getElementById('category').value;
+      const locationInput = document.getElementById('location').value.trim();
+      
+      // Clear existing filters
+      activeFilters.innerHTML = '';
+      
+      // Check if we have any active filters
+      const hasActiveFilters = searchInput || categorySelect || locationInput;
+      
+      // Toggle visibility
+      activeFilters.style.display = hasActiveFilters ? 'flex' : 'none';
+      
+      if (!hasActiveFilters) return;
+      
+      // Add search filter pill
+      if (searchInput) {
+        const searchPill = createFilterPill(`Search: ${searchInput}`, function() {
+          document.getElementById('search').value = '';
+          applyFilters();
+        });
+        activeFilters.appendChild(searchPill);
+      }
+      
+      // Add category filter pill
+      if (categorySelect) {
+        const categoryPill = createFilterPill(`Category: ${categorySelect}`, function() {
+          document.getElementById('category').value = '';
+          applyFilters();
+        });
+        activeFilters.appendChild(categoryPill);
+      }
+      
+      // Add location filter pill
+      if (locationInput) {
+        const locationPill = createFilterPill(`Location: ${locationInput}`, function() {
+          document.getElementById('location').value = '';
+          applyFilters();
+        });
+        activeFilters.appendChild(locationPill);
+      }
+    }
+    
+    // Create a filter pill element
+    function createFilterPill(text, removeCallback) {
+      const pill = document.createElement('div');
+      pill.className = 'bg-primary-light text-primary py-1 px-3 rounded-full text-sm font-medium flex items-center';
+      
+      pill.innerHTML = `
+        <span>${text}</span>
+        <button class="ml-2 text-primary hover:text-primary-dark focus:outline-none">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      // Add click handler to the remove button
+      pill.querySelector('button').addEventListener('click', removeCallback);
+      
+      return pill;
+    }
+    
+    // Render tasks in the container
+    function renderTasks(tasks) {
+      const tasksContainer = document.getElementById('tasks-container');
+      
+      // Clear container
+      tasksContainer.innerHTML = '';
+      
+      // Create and add task cards
+      tasks.forEach((task, index) => {
+        // Use TaskUtils if available, otherwise use internal method
+        const card = window.TaskUtils 
+          ? window.TaskUtils.createTaskCard(task)
+          : createTaskCardFallback(task);
+          
+        // Add animation delay for staggered effect
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.classList.add('animate-fade-in');
+        
+        tasksContainer.appendChild(card);
+      });
+    }
+    
+    // Fallback function to create a task card without TaskUtils
+    function createTaskCardFallback(task) {
+      const card = document.createElement('div');
+      card.className = 'bg-white rounded-lg shadow-sm overflow-hidden task-card transition-all hover:-translate-y-1 hover:shadow-md';
+      
+      const createdDate = formatDate(task.createdAt);
+      
+      card.innerHTML = `
+        <div class="p-5">
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="font-semibold text-lg">
+              <a href="task-detail.html?id=${task.id}" class="hover:text-primary transition-colors">${task.title}</a>
+            </h3>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
+              <i class="fas fa-door-open mr-1.5"></i>Open
+            </span>
+          </div>
+          
+          <p class="text-gray-600 text-sm mb-4 line-clamp-2">${task.description}</p>
+          
+          <div class="flex items-center text-sm text-gray-500 mb-2">
+            <i class="fas fa-tag mr-2 opacity-70 w-4"></i>
+            <span>${task.category || 'Other'}</span>
+          </div>
+          
+          <div class="flex items-center text-sm text-gray-500 mb-2">
+            <i class="fas fa-map-marker-alt mr-2 opacity-70 w-4"></i>
+            <span>${task.location || 'Remote'}</span>
+          </div>
+          
+          <div class="flex items-center text-sm text-gray-500 mb-3">
+            <i class="fas fa-rupee-sign mr-2 opacity-70 w-4"></i>
+            <span>${task.budget ? `₹${task.budget}` : 'Negotiable'}</span>
+          </div>
+          
+          <div class="border-t border-gray-100 mt-4 pt-4 flex justify-between items-center">
+            <div class="text-xs text-gray-500">Posted ${createdDate}</div>
+            <a href="task-detail.html?id=${task.id}" class="text-primary hover:underline text-sm">
+              View Details
+            </a>
+          </div>
+        </div>
+      `;
+      
+      return card;
+    }
+    
+    // Helper function to format date
+    function formatDate(dateString) {
+      if (!dateString) return 'Recently';
+      
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return 'Today';
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+      
+      return date.toLocaleDateString();
+    }
+  </script>
+  
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+      opacity: 0;
+    }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</body>
+</html>

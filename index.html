@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Victor - Connect for Tasks</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 font-sans">
+  <!-- Modern header with subtle gradient bg -->
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-4">
+        <a class="text-primary font-bold text-2xl flex items-center" href="index.html">
+          <span class="bg-gradient-to-r from-primary to-blue-600 text-white p-1.5 rounded mr-1.5 flex items-center justify-center w-8 h-8">V</span>ictor
+        </a>
+        
+        <button class="md:hidden text-gray-500 focus:outline-none" type="button" id="mobile-menu-button">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        
+        <div class="hidden md:flex items-center space-x-1" id="navbar-menu">
+          <a class="px-4 py-2 text-primary font-medium bg-primary-light rounded-md transition-colors" href="index.html">
+            <i class="fas fa-home mr-1"></i> Home
+          </a>
+          <a class="px-4 py-2 text-gray-700 font-medium hover:text-primary hover:bg-gray-50 rounded-md transition-colors" href="tasks.html">
+            <i class="fas fa-list-ul mr-1"></i> Browse Tasks
+          </a>
+          <a class="px-4 py-2 text-gray-700 font-medium hover:text-primary hover:bg-gray-50 rounded-md transition-colors" href="post-task.html">
+            <i class="fas fa-plus-circle mr-1"></i> Post a Task
+          </a>
+          
+          <!-- Login/Signup options (visible when logged out) -->
+          <div class="ml-4 flex items-center space-x-2" id="auth-buttons">
+            <a class="px-4 py-2 text-gray-700 font-medium hover:text-primary hover:underline transition-colors" href="login.html" id="login-menu-item">
+              Log In
+            </a>
+            <a class="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-md transition-colors" href="signup.html" id="signup-menu-item">
+              Sign Up
+            </a>
+          </div>
+          
+          <!-- User dropdown (hidden by default, shown when logged in) -->
+          <div class="relative hidden ml-2" id="user-menu-item">
+            <button class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors" id="user-menu-button">
+              <i class="fas fa-user-circle text-primary mr-2"></i>
+              <span id="username-display" class="font-medium">User</span>
+              <i class="fas fa-chevron-down ml-2 text-xs text-gray-500"></i>
+            </button>
+            <div class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-10 hidden border border-gray-100" id="user-dropdown">
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="dashboard.html">
+                <i class="fas fa-tachometer-alt w-5 mr-2 text-gray-400"></i> Dashboard
+              </a>
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="profile.html">
+                <i class="fas fa-user w-5 mr-2 text-gray-400"></i> My Profile
+              </a>
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="accepted-tasks.html">
+                <i class="fas fa-check-circle w-5 mr-2 text-gray-400"></i> Tasks I'm Working On
+              </a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50" href="#" id="logout-button">
+                <i class="fas fa-sign-out-alt w-5 mr-2 text-gray-400"></i> Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+    
+    <!-- Mobile menu (hidden by default) -->
+    <div class="md:hidden bg-white border-t border-gray-100 px-4 py-2 hidden" id="mobile-nav">
+      <div class="flex flex-col space-y-1">
+        <a class="px-2 py-2 bg-primary-light text-primary rounded-md" href="index.html">Home</a>
+        <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md" href="tasks.html">Browse Tasks</a>
+        <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md" href="post-task.html">Post a Task</a>
+        <div class="border-t border-gray-100 my-1"></div>
+        <div id="mobile-login-links">
+          <a class="block px-2 py-2 text-gray-700 hover:text-primary rounded-md" href="login.html">Log In</a>
+          <a class="block px-2 py-2 text-primary font-medium" href="signup.html">Create an Account</a>
+        </div>
+        <div id="mobile-user-links" class="hidden">
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="dashboard.html">
+            <i class="fas fa-tachometer-alt w-5 mr-2 text-gray-400"></i> Dashboard
+          </a>
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="profile.html">
+            <i class="fas fa-user w-5 mr-2 text-gray-400"></i> My Profile
+          </a>
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="accepted-tasks.html">
+            <i class="fas fa-check-circle w-5 mr-2 text-gray-400"></i> Tasks I'm Working On
+          </a>
+          <div class="border-t border-gray-100 my-1"></div>
+          <a class="px-2 py-2 text-gray-700 hover:text-primary rounded-md flex items-center" href="#" id="mobile-logout-button">
+            <i class="fas fa-sign-out-alt w-5 mr-2 text-gray-400"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow">
+    <!-- Stylish Hero Section with illustration -->
+    <section class="relative bg-gradient-to-b from-blue-50 via-white to-white pb-20">
+      <!-- Decorative elements -->
+      <div class="absolute top-10 left-10 w-20 h-20 bg-yellow-200 opacity-20 rounded-full"></div>
+      <div class="absolute bottom-10 right-10 w-32 h-32 bg-blue-200 opacity-20 rounded-full"></div>
+      <div class="absolute top-40 right-20 w-16 h-16 bg-green-200 opacity-20 rounded-full"></div>
+      
+      <div class="container mx-auto px-4 pt-16 md:pt-24 pb-16">
+        <div class="flex flex-col md:flex-row items-center">
+          <!-- Left content -->
+          <div class="md:w-1/2 md:pr-8 mb-10 md:mb-0">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+              Get Tasks Done <span class="text-primary">Together</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
+              Victor connects people who need tasks done with those who can help. From home services to tech support, find the perfect match for your needs.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="post-task.html" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                <i class="fas fa-clipboard-list mr-2"></i>Post a Task
+              </a>
+              <a href="tasks.html" class="bg-white hover:bg-gray-50 text-primary border border-primary px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center">
+                <i class="fas fa-search mr-2"></i>Browse Tasks
+              </a>
+            </div>
+            
+            <!-- Stats -->
+            <div class="flex flex-wrap mt-12">
+              <div class="mr-12 mb-4">
+                <p class="text-3xl font-bold text-primary">5000+</p>
+                <p class="text-gray-500">Tasks Completed</p>
+              </div>
+              <div class="mr-12 mb-4">
+                <p class="text-3xl font-bold text-primary">2,300+</p>
+                <p class="text-gray-500">Active Users</p>
+              </div>
+              <div class="mb-4">
+                <p class="text-3xl font-bold text-primary">4.8/5</p>
+                <p class="text-gray-500">User Satisfaction</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right illustration - Replaced with icon-based content -->
+          <div class="md:w-1/2 flex justify-center">
+            <div class="max-w-lg bg-primary-light bg-opacity-50 rounded-2xl p-8 relative">
+              <div class="absolute -top-4 -right-4 w-20 h-20 bg-primary bg-opacity-20 rounded-full"></div>
+              <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-200 bg-opacity-50 rounded-full"></div>
+              
+              <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center bg-primary text-white rounded-full w-20 h-20 mb-4">
+                  <i class="fas fa-users text-4xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800">Join Our Community</h3>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-6">
+                <div class="text-center">
+                  <div class="inline-flex items-center justify-center bg-white rounded-full w-14 h-14 mb-2 shadow-sm">
+                    <i class="fas fa-clipboard-list text-primary text-xl"></i>
+                  </div>
+                  <p class="font-medium text-gray-800">Post Tasks</p>
+                </div>
+                <div class="text-center">
+                  <div class="inline-flex items-center justify-center bg-white rounded-full w-14 h-14 mb-2 shadow-sm">
+                    <i class="fas fa-hand-holding-usd text-green-600 text-xl"></i>
+                  </div>
+                  <p class="font-medium text-gray-800">Earn Money</p>
+                </div>
+                <div class="text-center">
+                  <div class="inline-flex items-center justify-center bg-white rounded-full w-14 h-14 mb-2 shadow-sm">
+                    <i class="fas fa-star text-yellow-500 text-xl"></i>
+                  </div>
+                  <p class="font-medium text-gray-800">Rate Services</p>
+                </div>
+                <div class="text-center">
+                  <div class="inline-flex items-center justify-center bg-white rounded-full w-14 h-14 mb-2 shadow-sm">
+                    <i class="fas fa-shield-alt text-purple-600 text-xl"></i>
+                  </div>
+                  <p class="font-medium text-gray-800">Stay Secure</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section - Improved with icons and cards -->
+    <section class="py-16 bg-white"></section>
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">How Victor Works</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">Our platform makes it easy to connect people who need help with those who have the right skills.</p>
+        </div>
+        
+        <!-- Process steps -->
+        <div class="flex flex-col md:flex-row justify-center items-stretch gap-8 mb-10">
+          <!-- Step 1 -->
+          <div class="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-16 h-16 flex items-center justify-center text-white bg-gradient-to-br from-primary to-blue-600 rounded-full mb-4">
+              <i class="fas fa-clipboard-list text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">1. Post Your Task</h3>
+            <p class="text-gray-600">
+              Describe what you need help with, set your budget, and choose a location - whether remote or in-person.
+            </p>
+            <a href="post-task.html" class="inline-flex items-center text-primary font-medium mt-4 hover:underline">
+              Create a task <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+          
+          <!-- Step 2 -->
+          <div class="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-16 h-16 flex items-center justify-center text-white bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4">
+              <i class="fas fa-handshake text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">2. Connect</h3>
+            <p class="text-gray-600">
+              Someone with the right skills will accept your task and connect with you to discuss details and finalize arrangements.
+            </p>
+            <a href="#" class="inline-flex items-center text-primary font-medium mt-4 hover:underline">
+              How matching works <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+          
+          <!-- Step 3 -->
+          <div class="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 p-6 transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-16 h-16 flex items-center justify-center text-white bg-gradient-to-br from-green-500 to-teal-600 rounded-full mb-4">
+              <i class="fas fa-check-circle text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">3. Complete</h3>
+            <p class="text-gray-600">
+              Once the task is done to your satisfaction, mark it complete, make payment, and leave feedback for future reference.
+            </p>
+            <a href="#" class="inline-flex items-center text-primary font-medium mt-4 hover:underline">
+              Payment protection <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Testimonial -->
+        <div class="bg-gray-50 rounded-xl p-8 mt-12">
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/4 mb-6 md:mb-0 flex justify-center">
+              <div class="w-24 h-24 rounded-full bg-primary-light flex items-center justify-center">
+                <i class="fas fa-user-circle text-primary text-5xl"></i>
+              </div>
+            </div>
+            <div class="md:w-3/4 md:pl-8">
+              <div class="flex mb-2">
+                <i class="fas fa-star text-yellow-400"></i>
+                <i class="fas fa-star text-yellow-400"></i>
+                <i class="fas fa-star text-yellow-400"></i>
+                <i class="fas fa-star text-yellow-400"></i>
+                <i class="fas fa-star text-yellow-400"></i>
+              </div>
+              <p class="text-gray-600 italic mb-4">
+                "I needed help moving apartments and found the perfect helper on Victor. The process was so smooth, and I saved a lot compared to hiring a moving company!"
+              </p>
+              <p class="font-medium">Priya S. - <span class="text-gray-500">Delhi</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Popular Categories Section - Visual Grid -->
+    <section class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">Popular Task Categories</h2>
+          <p class="text-gray-600 max-w-2xl mx-auto">Browse tasks by category or post your own to get started.</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <!-- Home Services -->
+          <a href="tasks.html?category=Home Services" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-home text-xl"></i>
+            </div>
+            <h3 class="font-semibold">Home Services</h3>
+            <p class="text-sm text-gray-500 mt-1">Cleaning, repairs & more</p>
+          </a>
+          
+          <!-- Delivery -->
+          <a href="tasks.html?category=Delivery" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-truck text-xl"></i>
+            </div>
+            <h3 class="font-semibold">Delivery</h3>
+            <p class="text-sm text-gray-500 mt-1">Packages & food delivery</p>
+          </a>
+          
+          <!-- IT & Tech -->
+          <a href="tasks.html?category=IT & Tech" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-laptop-code text-xl"></i>
+            </div>
+            <h3 class="font-semibold">IT & Tech</h3>
+            <p class="text-sm text-gray-500 mt-1">Websites, apps & support</p>
+          </a>
+          
+          <!-- Tutoring -->
+          <a href="tasks.html?category=Tutoring" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-14 h-14 bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-book text-xl"></i>
+            </div>
+            <h3 class="font-semibold">Tutoring</h3>
+            <p class="text-sm text-gray-500 mt-1">Academic help & lessons</p>
+          </a>
+          
+          <!-- Events -->
+          <a href="tasks.html?category=Events" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-14 h-14 bg-pink-50 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-calendar-alt text-xl"></i>
+            </div>
+            <h3 class="font-semibold">Events</h3>
+            <p class="text-sm text-gray-500 mt-1">Photography & assistance</p>
+          </a>
+          
+          <!-- More Categories -->
+          <a href="tasks.html" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 text-center transition hover:shadow-md hover:-translate-y-1 duration-300">
+            <div class="w-14 h-14 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-ellipsis-h text-xl"></i>
+            </div>
+            <h3 class="font-semibold">All Categories</h3>
+            <p class="text-sm text-gray-500 mt-1">Explore more</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Tasks Section - Improved Cards -->
+    <section class="py-16 bg-white">
+      <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center mb-10">
+          <h2 class="text-3xl font-bold">Recent Tasks</h2>
+          <a href="tasks.html" class="text-primary hover:text-primary-dark transition-colors flex items-center font-medium">
+            Browse all tasks <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+        
+        <!-- Loading spinner -->
+        <div id="recent-tasks-loading" class="text-center py-12">
+          <div class="inline-block w-12 h-12 border-4 border-gray-200 border-t-primary rounded-full animate-spin mb-4"></div>
+          <p class="text-gray-500">Loading recent tasks...</p>
+        </div>
+        
+        <!-- Task grid - will be populated with JS -->
+        <div id="recent-tasks-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
+        
+        <!-- Error state -->
+        <div id="recent-tasks-error" class="bg-red-50 text-red-600 p-6 rounded-lg text-center hidden">
+          <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+          <p class="font-medium">We couldn't load recent tasks</p>
+          <p class="text-sm text-red-500 mt-1">Please refresh the page or try again later</p>
+          <button class="mt-3 bg-white text-red-600 border border-red-200 rounded px-4 py-2 hover:bg-red-50 transition-colors">Retry</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Featured Benefits Section -->
+    <section class="py-16 bg-gray-50">
+      <div class="container mx-auto px-4">
+        <div class="max-w-3xl mx-auto text-center mb-12">
+          <h2 class="text-3xl font-bold mb-4">Why Choose Victor?</h2>
+          <p class="text-gray-600">Our platform offers a safe, efficient way to get things done and help others.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <!-- Card 1 -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <i class="fas fa-shield-alt text-green-600"></i>
+            </div>
+            <h3 class="font-semibold text-lg mb-2">Secure & Safe</h3>
+            <p class="text-gray-600">Verified users, secure payments, and reliable service guarantees.</p>
+          </div>
+          
+          <!-- Card 2 -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <i class="fas fa-hand-holding-usd text-blue-600"></i>
+            </div>
+            <h3 class="font-semibold text-lg mb-2">Flexible Pricing</h3>
+            <p class="text-gray-600">Set your budget or negotiate the right price for any task.</p>
+          </div>
+          
+          <!-- Card 3 -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+              <i class="fas fa-user-check text-purple-600"></i>
+            </div>
+            <h3 class="font-semibold text-lg mb-2">Verified Skills</h3>
+            <p class="text-gray-600">Find people with the right skills and experience for your specific needs.</p>
+          </div>
+          
+          <!-- Card 4 -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mb-4">
+              <i class="fas fa-comments text-pink-600"></i>
+            </div>
+            <h3 class="font-semibold text-lg mb-2">Great Support</h3>
+            <p class="text-gray-600">Our customer support team is ready to help you with any issues.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- CTA Section with background -->
+    <section class="py-16 bg-gradient-to-r from-primary-dark to-primary text-white">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-6">Ready to get started?</h2>
+        <p class="text-lg mb-8 max-w-2xl mx-auto opacity-90">
+          Whether you need help with tasks or want to earn by helping others, Victor makes it easy to connect.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+          <a href="signup.html" class="bg-white text-primary hover:bg-gray-100 px-6 py-3 rounded-lg font-medium transition-colors">
+            Sign up for free
+          </a>
+          <a href="tasks.html" class="bg-transparent hover:bg-primary-dark border border-white text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            Explore tasks
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <footer class="bg-gray-800 text-white py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <a class="text-white font-bold text-2xl flex items-center mb-4" href="index.html">
+            <span class="bg-white text-primary p-1 rounded mr-1.5 flex items-center justify-center w-8 h-8">V</span>ictor
+          </a>
+          <p class="text-gray-300 mb-4">Connecting people for tasks - anytime, anywhere. Get help or help others.</p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-gray-300 hover:text-white transition-colors"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4 text-lg">For Task Posters</h4>
+          <ul class="space-y-2">
+            <li><a href="post-task.html" class="text-gray-300 hover:text-white transition-colors">Post a Task</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">How it Works</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Pricing</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4 text-lg">For Task Performers</h4>
+          <ul class="space-y-2">
+            <li><a href="tasks.html" class="text-gray-300 hover:text-white transition-colors">Browse Tasks</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Task Categories</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Earn Money</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Success Stories</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="font-semibold mb-4 text-lg">Support</h4>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Help Center</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
+            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+        <p class="text-gray-300">© 2023 Victor - Connect for Tasks. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+  
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get API URL from config
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('mobile-nav').classList.toggle('hidden');
+      });
+      
+      // Check if user is logged in
+      checkLoginStatus();
+      
+      // Load recent tasks
+      loadRecentTasks();
+      
+      // Function to check login status
+      function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem('token') !== null;
+        
+        const loginMenuItem = document.getElementById('login-menu-item');
+        const signupMenuItem = document.getElementById('signup-menu-item');
+        const userMenuItem = document.getElementById('user-menu-item');
+        const mobileLoginLinks = document.getElementById('mobile-login-links');
+        const mobileUserLinks = document.getElementById('mobile-user-links');
+        
+        if (isLoggedIn) {
+          if (loginMenuItem) loginMenuItem.classList.add('hidden');
+          if (signupMenuItem) signupMenuItem.classList.add('hidden');
+          if (mobileLoginLinks) mobileLoginLinks.classList.add('hidden');
+          
+          if (userMenuItem) {
+            userMenuItem.classList.remove('hidden');
+            
+            // Display username if available
+            const username = localStorage.getItem('username') || 'User';
+            const usernameDisplay = document.getElementById('username-display');
+            if (usernameDisplay) {
+              usernameDisplay.textContent = username;
+            }
+            
+            // Setup user dropdown toggle
+            const userMenuButton = document.getElementById('user-menu-button');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            if (userMenuButton && userDropdown) {
+              userMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('hidden');
+              });
+              
+              // Close dropdown when clicking outside
+              document.addEventListener('click', function(event) {
+                if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                  userDropdown.classList.add('hidden');
+                }
+              });
+            }
+            
+            // Setup logout button
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+              logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+              });
+            }
+          }
+          
+          if (mobileUserLinks) {
+            mobileUserLinks.classList.remove('hidden');
+            
+            // Setup mobile logout button
+            const mobileLogoutButton = document.getElementById('mobile-logout-button');
+            if (mobileLogoutButton) {
+              mobileLogoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+              });
+            }
+          }
+        } else {
+          if (loginMenuItem) loginMenuItem.classList.remove('hidden');
+          if (signupMenuItem) signupMenuItem.classList.remove('hidden');
+          if (userMenuItem) userMenuItem.classList.add('hidden');
+          if (mobileLoginLinks) mobileLoginLinks.classList.remove('hidden');
+          if (mobileUserLinks) mobileUserLinks.classList.add('hidden');
+        }
+      }
+      
+      // Logout function
+      function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        
+        window.location.reload();
+      }
+      
+      // Load recent tasks with better error handling and animations
+      async function loadRecentTasks() {
+        const loadingElement = document.getElementById('recent-tasks-loading');
+        const tasksGrid = document.getElementById('recent-tasks-grid');
+        const errorElement = document.getElementById('recent-tasks-error');
+        
+        try {
+          // Try to connect to server and fetch tasks
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          
+          const response = await fetch(`${API_URL}/api/tasks`, {
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) {
+            throw new Error(`Failed to load tasks (${response.status})`);
+          }
+          
+          const tasks = await response.json();
+          
+          // Hide loading, show tasks
+          loadingElement.style.display = 'none';
+          tasksGrid.classList.remove('hidden');
+          
+          // Get only open tasks, limit to 6, and sort by newest first
+          const recentTasks = tasks
+            .filter(task => task.status === 'Open')
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 6);
+          
+          // Render tasks
+          if (recentTasks.length === 0) {
+            tasksGrid.innerHTML = `
+              <div class="md:col-span-3 text-center py-8">
+                <div class="inline-flex items-center justify-center bg-gray-100 rounded-full w-20 h-20 mb-4">
+                  <i class="fas fa-clipboard-check text-gray-400 text-3xl"></i>
+                </div>
+                <p class="text-gray-500 mb-4">No tasks available at the moment.</p>
+                <a href="post-task.html" class="text-white bg-primary px-6 py-2 rounded-lg hover:bg-primary-dark transition-colors">Be the first to post a task</a>
+              </div>
+            `;
+          } else {
+            tasksGrid.innerHTML = '';
+            
+            recentTasks.forEach((task, index) => {
+              const createdDate = formatDate(task.createdAt);
+              
+              const taskCard = document.createElement('div');
+              taskCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all hover:-translate-y-1 duration-300';
+              taskCard.style.animationDelay = `${index * 0.1}s`;
+              taskCard.classList.add('animate-fade-in');
+              
+              taskCard.innerHTML = `
+                <div class="p-5">
+                  <div class="flex justify-between items-start mb-3">
+                    <h3 class="font-semibold text-lg">
+                      <a href="task-detail.html?id=${task.id}" class="hover:text-primary transition-colors">${task.title}</a>
+                    </h3>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-600">
+                      <i class="fas fa-circle text-xs mr-1"></i>Open
+                    </span>
+                  </div>
+                  
+                  <p class="text-gray-600 text-sm mb-4 line-clamp-2">${task.description}</p>
+                  
+                  <div class="flex items-center text-sm text-gray-500 mb-3">
+                    <i class="fas fa-tag mr-2 opacity-70"></i>
+                    <span>${task.category || 'Other'}</span>
+                  </div>
+                  
+                  <div class="flex items-center text-sm text-gray-500 mb-3">
+                    <i class="fas fa-map-marker-alt mr-2 opacity-70"></i>
+                    <span>${task.location || 'Remote'}</span>
+                  </div>
+                  
+                  <div class="flex items-center text-sm text-gray-500">
+                    <i class="fas fa-rupee-sign mr-2 opacity-70"></i>
+                    <span>${task.budget ? `₹${task.budget}` : 'Negotiable'}</span>
+                  </div>
+                  
+                  <div class="border-t border-gray-100 mt-4 pt-4 flex justify-between items-center">
+                    <div class="text-xs text-gray-500">Posted ${createdDate}</div>
+                    <a href="task-detail.html?id=${task.id}" class="text-primary hover:underline text-sm">
+                      View Details
+                    </a>
+                  </div>
+                </div>
+              `;
+              
+              tasksGrid.appendChild(taskCard);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading tasks:', error);
+          
+          // Hide loading, show error
+          loadingElement.style.display = 'none';
+          errorElement.classList.remove('hidden');
+          
+          // Add retry functionality
+          const retryButton = errorElement.querySelector('button');
+          if (retryButton) {
+            retryButton.addEventListener('click', () => {
+              errorElement.classList.add('hidden');
+              loadingElement.style.display = 'block';
+              loadRecentTasks();
+            });
+          }
+        }
+      }
+      
+      // Helper function to format date
+      function formatDate(dateString) {
+        if (!dateString) return 'Recently';
+        
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+        
+        return date.toLocaleDateString();
+      }
+    });
+  </script>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+      opacity: 0;
+    }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</body>
+</html>

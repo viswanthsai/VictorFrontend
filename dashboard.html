@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <script src="js/notification.js"></script>
+  <script src="js/task-utils.js"></script>
+  <script src="js/main.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .dashboard-card {
+      transition: all 0.3s ease;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+    .status-pill {
+      transition: all 0.2s ease;
+    }
+    .status-pill:hover {
+      transform: translateY(-2px);
+    }
+    .sidebar-link.active {
+      background-color: #e8f0fe;
+      color: #1a73e8;
+      font-weight: 500;
+    }
+    .sidebar-link.active i {
+      color: #1a73e8;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+  <!-- Modern header with shadow -->
+  <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl flex items-center" href="index.html">
+          <span class="bg-gradient-to-r from-primary to-blue-600 text-white p-1.5 rounded mr-1.5 flex items-center justify-center w-8 h-8">V</span>ictor
+        </a>
+        
+        <!-- Search bar - desktop -->
+        <div class="hidden md:flex flex-grow max-w-xl mx-8">
+          <div class="relative w-full">
+            <input type="text" placeholder="Search tasks..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-search text-gray-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mobile menu button -->
+        <button class="md:hidden text-gray-600 focus:outline-none" id="mobile-menu-button"></button>
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        
+        <!-- Desktop nav menu -->
+        <nav class="hidden md:flex items-center space-x-1">
+          <a href="index.html" class="px-3 py-2 text-gray-700 hover:text-primary rounded-md transition-colors">Home</a>
+          <a href="tasks.html" class="px-3 py-2 text-gray-700 hover:text-primary rounded-md transition-colors">Browse Tasks</a>
+          <a href="post-task.html" class="px-3 py-2 text-gray-700 hover:text-primary rounded-md transition-colors">Post a Task</a>
+          
+          <!-- Notifications dropdown -->
+          <div class="relative">
+            <button class="p-2 text-gray-600 hover:text-primary rounded-full hover:bg-gray-100 relative" id="notifications-button">
+              <i class="fas fa-bell"></i>
+              <span class="absolute top-0 right-0 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">2</span>
+            </button>
+            <div class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-1 z-10 hidden border border-gray-100" id="notifications-dropdown">
+              <div class="px-4 py-3 border-b border-gray-100">
+                <h3 class="font-semibold text-gray-900">Notifications</h3>
+              </div>
+              <div class="max-h-64 overflow-y-auto">
+                <a href="task-detail.html?id=3" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100">
+                  <p class="font-medium text-gray-900">Your task has been accepted</p>
+                  <p class="text-sm text-gray-600">Someone has accepted your "Home Cleaning" task</p>
+                  <p class="text-xs text-gray-500 mt-1">1 hour ago</p>
+                </a>
+                <a href="task-detail.html?id=6" class="block px-4 py-3 hover:bg-gray-50">
+                  <p class="font-medium text-gray-900">New message received</p>
+                  <p class="text-sm text-gray-600">You received a new message about "Cooking"</p>
+                  <p class="text-xs text-gray-500 mt-1">3 hours ago</p>
+                </a>
+              </div>
+              <a href="#" class="block text-center text-sm text-primary font-medium px-4 py-2 hover:underline">View all notifications</a>
+            </div>
+          </div>
+          
+          <!-- User dropdown -->
+          <div class="relative" id="user-menu-container">
+            <button class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-50 rounded-full transition-colors" id="user-menu-button">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-400 to-blue-500 text-white flex items-center justify-center font-bold mr-2" id="user-avatar">V</div>
+              <span class="font-medium mr-1" id="username-display">User</span>
+              <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+            </button>
+            <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-1 z-10 hidden border border-gray-100" id="user-dropdown">
+              <div class="px-4 py-3 border-b border-gray-100">
+                <p class="text-sm font-medium text-gray-900" id="user-name-dropdown">User</p>
+                <p class="text-sm text-gray-500 truncate" id="user-email-dropdown">user@example.com</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 bg-gray-50">
+                <i class="fas fa-tachometer-alt w-5 text-primary mr-2"></i> Dashboard
+              </a>
+              <a href="profile.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-user-circle w-5 text-gray-400 mr-2"></i> My Profile
+              </a>
+              <a href="accepted-tasks.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-check-circle w-5 text-gray-400 mr-2"></i> Tasks I'm Working On
+              </a>
+              <a href="settings.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-cog w-5 text-gray-400 mr-2"></i> Settings
+              </a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="#" id="logout-button" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <i class="fas fa-sign-out-alt w-5 text-gray-400 mr-2"></i> Logout
+              </a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile menu (hidden by default) -->
+  <div class="md:hidden fixed top-14 left-0 right-0 bg-white shadow-md z-40 hidden" id="mobile-menu">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex flex-col space-y-2">
+        <!-- Mobile search -->
+        <div class="relative mb-2">
+          <input type="text" placeholder="Search tasks..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-search text-gray-400"></i>
+          </div>
+        </div>
+        
+        <a href="index.html" class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Home</a>
+        <a href="tasks.html" class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Browse Tasks</a>
+        <a href="post-task.html" class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Post a Task</a>
+        <a href="dashboard.html" class="px-4 py-2 text-primary bg-primary-light rounded-md">Dashboard</a>
+        <a href="profile.html" class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md">My Profile</a>
+        <a href="accepted-tasks.html" class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md">Tasks I'm Working On</a>
+        <div class="border-t border-gray-100 my-2 pt-2">
+          <a href="#" id="mobile-logout-button" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-md flex items-center">
+            <i class="fas fa-sign-out-alt mr-2"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard layout with sidebar -->
+  <div class="pt-16 flex min-h-screen">
+    <!-- Sidebar - Desktop -->
+    <div class="hidden md:block w-64 bg-white shadow-sm border-r border-gray-100 pt-6 pb-8 min-h-screen fixed top-16 left-0">
+      <div class="px-4 mb-6">
+        <h2 class="text-xl font-bold text-gray-900">Dashboard</h2>
+        <p class="text-sm text-gray-500">Manage your tasks and account</p>
+      </div>
+      <nav class="space-y-1 px-2">
+        <a href="#overview" class="sidebar-link active flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg" data-section="overview">
+          <i class="fas fa-home w-5 mr-3 text-gray-400"></i>
+          <span>Overview</span>
+        </a>
+        <a href="#my-tasks" class="sidebar-link flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg" data-section="my-tasks">
+          <i class="fas fa-tasks w-5 mr-3 text-gray-400"></i>
+          <span>My Tasks</span>
+        </a>
+        <a href="#accepted-tasks" class="sidebar-link flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg" data-section="accepted-tasks">
+          <i class="fas fa-check-circle w-5 mr-3 text-gray-400"></i>
+          <span>Tasks I've Accepted</span>
+        </a>
+        <a href="#transactions" class="sidebar-link flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg" data-section="transactions">
+          <i class="fas fa-exchange-alt w-5 mr-3 text-gray-400"></i>
+          <span>Transactions</span>
+        </a>
+        <div class="px-3 py-4">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Account</h4>
+        </div>
+        <a href="profile.html" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-user w-5 mr-3 text-gray-400"></i>
+          <span>Profile</span>
+        </a>
+        <a href="settings.html" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-cog w-5 mr-3 text-gray-400"></i>
+          <span>Settings</span>
+        </a>
+        <a href="#" class="flex items-center px-4 py-2.5 text-gray-700 hover:bg-gray-50 rounded-lg">
+          <i class="fas fa-life-ring w-5 mr-3 text-gray-400"></i>
+          <span>Help & Support</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Main content -->
+    <main class="md:ml-64 flex-grow p-4 md:p-8">
+      <!-- Dashboard sections -->
+      <div id="overview-section" class="section-content">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+            <p class="text-sm text-gray-500">Welcome back, <span id="welcome-name">User</span>!</p>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <a href="post-task.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <i class="fas fa-plus mr-2"></i> New Task
+            </a>
+          </div>
+        </div>
+        
+        <!-- Stats cards - Enhanced design -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <!-- Posted Tasks -->
+          <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-500">Posted Tasks</h3>
+              <span class="text-primary">
+                <i class="fas fa-clipboard-list"></i>
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-3xl font-bold" id="posted-tasks-count">0</p>
+              <span class="text-xs px-2 py-1 rounded-full text-green-700 bg-green-100" id="posted-tasks-change">+2 this week</span>
+            </div>
+          </div>
+          
+          <!-- In Progress -->
+          <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-500">In Progress</h3>
+              <span class="text-yellow-500">
+                <i class="fas fa-spinner"></i>
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-3xl font-bold" id="in-progress-count">0</p>
+              <span class="text-xs px-2 py-1 rounded-full text-blue-700 bg-blue-100" id="in-progress-tasks-change">0 waiting</span>
+            </div>
+          </div>
+          
+          <!-- Completed -->
+          <div class="dashboard-card bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-500">Completed</h3>
+              <span class="text-green-500">
+                <i class="fas fa-check-circle"></i>
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-3xl font-bold" id="completed-count">0</p>
+              <span class="text-xs px-2 py-1 rounded-full text-green-700 bg-green-100" id="completed-tasks-change">all time</span>
+            </div>
+          </div>
+          
+          <!-- Earnings -->
+          <div class="dashboard-card bg-gradient-to-br from-primary to-blue-600 rounded-xl shadow-sm p-6 text-white">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-white text-opacity-90">Total Earnings</h3>
+              <span class="text-white">
+                <i class="fas fa-wallet"></i>
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-3xl font-bold" id="earnings-count">₹0</p>
+              <span class="text-xs px-2 py-1 rounded-full bg-white bg-opacity-20 text-white" id="earnings-change">Lifetime</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recent activity and quick actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Recent Tasks -->
+          <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div class="flex justify-between items-center p-5 border-b border-gray-100">
+                <h2 class="font-semibold text-lg">Recent Tasks</h2>
+                <a href="#my-tasks" class="text-primary text-sm hover:underline" data-section-link="my-tasks">View all</a>
+              </div>
+              
+              <div class="divide-y divide-gray-100" id="recent-tasks-list">
+                <div class="p-4 flex items-center animate-pulse">
+                  <div class="w-14 h-14 rounded-lg bg-gray-200 mr-3"></div>
+                  <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+                <div class="p-4 flex items-center animate-pulse">
+                  <div class="w-14 h-14 rounded-lg bg-gray-200 mr-3"></div>
+                  <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+              <h2 class="font-semibold text-lg mb-4">Quick Actions</h2>
+              <div class="space-y-3">
+                <a href="post-task.html" class="flex items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                  <span class="w-10 h-10 rounded-lg bg-primary bg-opacity-10 flex items-center justify-center text-primary mr-3">
+                    <i class="fas fa-plus-circle"></i>
+                  </span>
+                  <div>
+                    <h3 class="font-medium text-gray-900">Post a new task</h3>
+                    <p class="text-xs text-gray-500">Create a task request</p>
+                  </div>
+                </a>
+                <a href="tasks.html" class="flex items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                  <span class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center text-green-600 mr-3">
+                    <i class="fas fa-search"></i>
+                  </span>
+                  <div>
+                    <h3 class="font-medium text-gray-900">Find tasks</h3>
+                    <p class="text-xs text-gray-500">Browse available tasks</p>
+                  </div>
+                </a>
+                <a href="settings.html" class="flex items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                  <span class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600 mr-3">
+                    <i class="fas fa-cog"></i>
+                  </span>
+                  <div>
+                    <h3 class="font-medium text-gray-900">Account settings</h3>
+                    <p class="text-xs text-gray-500">Update your profile</p>
+                  </div>
+                </a>
+                <a href="#" class="flex items-center p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                  <span class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 mr-3">
+                    <i class="fas fa-question-circle"></i>
+                  </span>
+                  <div>
+                    <h3 class="font-medium text-gray-900">Help center</h3>
+                    <p class="text-xs text-gray-500">Support and resources</p>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- My Tasks Section -->
+      <div id="my-tasks-section" class="section-content hidden">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">My Tasks</h1>
+            <p class="text-sm text-gray-500">Manage your posted tasks</p>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <a href="post-task.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <i class="fas fa-plus mr-2"></i> Post a New Task
+            </a>
+          </div>
+        </div>
+        
+        <!-- Search and filters -->
+        <div class="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+          <div class="p-5 border-b border-gray-100">
+            <div class="flex flex-wrap gap-4">
+              <div class="flex-grow">
+                <div class="relative">
+                  <input type="text" placeholder="Search in your tasks..." id="my-task-search" class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <select id="my-task-status-filter" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                  <option value="">All Status</option>
+                  <option value="Open">Open</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+                <select id="my-task-sort" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary">
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="budget-high">Budget: High to Low</option>
+                  <option value="budget-low">Budget: Low to High</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Active filters (if any) -->
+          <div id="my-task-filters" class="px-5 py-3 bg-gray-50 flex flex-wrap gap-2 hidden">
+            <!-- Active filters will be added here -->
+          </div>
+        </div>
+        
+        <!-- Tasks table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200" id="my-tasks-table">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200 relative" id="my-tasks-tbody">
+                <!-- Loading placeholders -->
+                <tr class="animate-pulse">
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded w-20"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-5 bg-gray-200 rounded w-16"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded w-24"></div>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="h-4 bg-gray-200 rounded w-16 ml-auto"></div>
+                  </td>
+                </tr>
+                <tr class="animate-pulse">
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded w-20"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-5 bg-gray-200 rounded w-16"></div>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="h-4 bg-gray-200 rounded w-24"></div>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <div class="h-4 bg-gray-200 rounded w-16 ml-auto"></div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Empty state (hidden by default) -->
+          <div id="my-tasks-empty" class="py-12 text-center hidden">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <i class="fas fa-clipboard text-gray-400 text-xl"></i>
+            </div>
+            <p class="text-gray-500 mb-4">You haven't posted any tasks yet</p>
+            <a href="post-task.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <i class="fas fa-plus mr-2"></i> Create your first task
+            </a>
+          </div>
+
+          <!-- Error state (hidden by default) -->
+          <div id="my-tasks-error" class="py-12 text-center hidden">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+              <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+            </div>
+            <p class="text-gray-800 font-medium mb-2">Failed to load your tasks</p>
+            <p class="text-gray-500 mb-4">Please try again or contact support if the problem persists</p>
+            <button id="retry-my-tasks" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <i class="fas fa-redo mr-2"></i> Try Again
+            </button>
+          </div>
+        </div>
+        
+        <!-- Task statistics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold mb-4">Task Status Distribution</h3>
+            <div class="h-60 flex items-center justify-center" id="task-status-chart">
+              <div class="space-y-4 w-full">
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span class="text-sm font-medium">Open Tasks</span>
+                    <span class="text-sm text-gray-500" id="open-tasks-count">0</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-blue-500 h-2.5 rounded-full" id="open-tasks-bar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span class="text-sm font-medium">In Progress</span>
+                    <span class="text-sm text-gray-500" id="progress-tasks-count">0</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-yellow-500 h-2.5 rounded-full" id="progress-tasks-bar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between mb-1">
+                    <span class="text-sm font-medium">Completed</span>
+                    <span class="text-sm text-gray-500" id="completed-tasks-count">0</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-green-500 h-2.5 rounded-full" id="completed-tasks-bar" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold mb-4">Popular Categories</h3>
+            <div class="h-60 flex items-center justify-center" id="task-categories-chart">
+              <div class="space-y-3 w-full">
+                <div class="flex items-center mb-2">
+                  <div class="w-3 h-3 rounded-full bg-primary mr-2"></div>
+                  <span class="text-sm">IT & Tech</span>
+                  <span class="ml-auto text-sm font-medium">60%</span>
+                </div>
+                <div class="flex items-center mb-2">
+                  <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                  <span class="text-sm">Home Services</span>
+                  <span class="ml-auto text-sm font-medium">25%</span>
+                </div>
+                <div class="flex items-center mb-2">
+                  <div class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                  <span class="text-sm">Delivery</span>
+                  <span class="ml-auto text-sm font-medium">10%</span>
+                </div>
+                <div class="flex items-center mb-2">
+                  <div class="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
+                  <span class="text-sm">Tutoring</span>
+                  <span class="ml-auto text-sm font-medium">5%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="text-lg font-semibold mb-4">Task Activity</h3>
+            <div class="h-60 flex items-center justify-center" id="task-activity-chart">
+              <div class="w-full text-center text-gray-500 italic">
+                Chart visualization will appear here
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accepted Tasks Section -->
+      <div id="accepted-tasks-section" class="section-content hidden">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Tasks I've Accepted</h1>
+            <p class="text-sm text-gray-500">Manage the tasks you're working on</p>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <a href="tasks.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <i class="fas fa-search mr-2"></i> Find More Tasks
+            </a>
+          </div>
+        </div>
+
+        <!-- Task cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8" id="accepted-tasks-container">
+          <!-- Loading placeholders -->
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 animate-pulse">
+            <div class="p-5">
+              <div class="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+              <div class="h-4 bg-gray-200 rounded w-full mb-3"></div>
+              <div class="h-4 bg-gray-200 rounded w-full mb-3"></div>
+              <div class="flex items-center mb-3">
+                <div class="w-4 h-4 bg-gray-200 rounded-full mr-3"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+              </div>
+              <div class="flex items-center mb-3">
+                <div class="w-4 h-4 bg-gray-200 rounded-full mr-3"></div>
+                <div class="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+              <div class="flex items-center mb-3">
+                <div class="w-4 h-4 bg-gray-200 rounded-full mr-3"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+              <div class="h-px bg-gray-200 my-4"></div>
+              <div class="flex justify-between">
+                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Empty state (hidden by default) -->
+          <div id="accepted-tasks-empty" class="col-span-3 py-12 text-center hidden">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <i class="fas fa-hands-helping text-gray-400 text-xl"></i>
+            </div>
+            <p class="text-gray-500 mb-4">You haven't accepted any tasks yet</p>
+            <a href="tasks.html" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <i class="fas fa-search mr-2"></i> Browse Available Tasks
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transactions Section -->
+      <div id="transactions-section" class="section-content hidden">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Transactions</h1>
+            <p class="text-sm text-gray-500">Your payment history and earnings</p>
+          </div>
+          <div class="mt-4 md:mt-0">
+            <button class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <i class="fas fa-download mr-2"></i> Download Statement
+            </button>
+          </div>
+        </div>
+
+        <!-- Transaction summary cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 mb-4">Total Earnings</h3>
+            <p class="text-3xl font-bold text-gray-900">₹0.00</p>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-green-600 flex items-center">
+                <i class="fas fa-arrow-up mr-1 text-xs"></i>
+                0%
+              </span>
+              <span class="text-gray-500 ml-2">from last month</span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 mb-4">Pending Payments</h3>
+            <p class="text-3xl font-bold text-gray-900">₹0.00</p>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-yellow-600">
+                0 tasks awaiting payment
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 mb-4">Total Spent</h3>
+            <p class="text-3xl font-bold text-gray-900">₹0.00</p>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-blue-600 flex items-center">
+                <i class="fas fa-arrow-down mr-1 text-xs"></i>
+                0%
+              </span>
+              <span class="text-gray-500 ml-2">from last month</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transaction table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+          <div class="p-6 flex justify-between items-center border-b border-gray-100">
+            <h2 class="font-semibold text-lg">Transaction History</h2>
+            <div class="flex space-x-2">
+              <div class="relative">
+                <input type="text" placeholder="Search transactions..." class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="fas fa-search text-gray-400"></i>
+                </div>
+              </div>
+              <select class="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                <option value="all">All Transactions</option>
+                <option value="earnings">Earnings</option>
+                <option value="payments">Payments</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Empty state -->
+          <div class="py-16 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <i class="fas fa-receipt text-gray-400 text-xl"></i>
+            </div>
+            <p class="text-gray-800 font-medium mb-2">No transactions yet</p>
+            <p class="text-gray-500">Your transaction history will appear here</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Notification System (Hidden by default) -->
+  <div id="notification-container" class="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-2"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is logged in
+      if (!localStorage.getItem('token')) {
+        // Redirect to login page if not logged in
+        window.location.href = 'login.html?redirect=dashboard.html&message=Please login to access the dashboard';
+        return;
+      }
+      
+      // Initialize dashboard
+      initializeDashboard();
+      
+      // Setup mobile menu toggle
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+        });
+      }
+      
+      // Setup notifications dropdown
+      const notificationsButton = document.getElementById('notifications-button');
+      const notificationsDropdown = document.getElementById('notifications-dropdown');
+      if (notificationsButton && notificationsDropdown) {
+        notificationsButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          notificationsDropdown.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', function(e) {
+          if (!notificationsButton.contains(e.target) && !notificationsDropdown.contains(e.target)) {
+            notificationsDropdown.classList.add('hidden');
+          }
+        });
+      }
+      
+      // Setup user dropdown
+      const userMenuButton = document.getElementById('user-menu-button');
+      const userDropdown = document.getElementById('user-dropdown');
+      if (userMenuButton && userDropdown) {
+        userMenuButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          userDropdown.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', function(e) {
+          if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+      
+      // Setup logout button
+      const logoutButton = document.getElementById('logout-button');
+      if (logoutButton) {
+        logoutButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          logout();
+        });
+      }
+      
+      const mobileLogoutButton = document.getElementById('mobile-logout-button');
+      if (mobileLogoutButton) {
+        mobileLogoutButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          logout();
+        });
+      }
+      
+      // Setup sidebar navigation
+      const sidebarLinks = document.querySelectorAll('.sidebar-link');
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Remove active class from all links
+          sidebarLinks.forEach(l => l.classList.remove('active'));
+          
+          // Add active class to clicked link
+          this.classList.add('active');
+          
+          // Hide all sections
+          document.querySelectorAll('.section-content').forEach(section => {
+            section.classList.add('hidden');
+          });
+          
+          // Show the selected section
+          const sectionId = this.getAttribute('data-section') + '-section';
+          document.getElementById(sectionId).classList.remove('hidden');
+          
+          // Update URL hash without scrolling
+          const hash = this.getAttribute('href');
+          history.pushState(null, null, hash);
+        });
+      });
+      
+      // Also handle section links
+      document.querySelectorAll('[data-section-link]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const sectionName = this.getAttribute('data-section-link');
+          const sidebarLink = document.querySelector(`.sidebar-link[data-section="${sectionName}"]`);
+          if (sidebarLink) {
+            sidebarLink.click();
+          }
+        });
+      });
+      
+      // Handle initial hash on page load
+      if (window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        const sidebarLink = document.querySelector(`.sidebar-link[data-section="${hash}"]`);
+        if (sidebarLink) {
+          sidebarLink.click();
+        }
+      }
+      
+      // Load user data to display in the dashboard
+      fetchUserProfile();
+      
+      // Fetch task data for dashboard
+      fetchTasks();
+    });
+    
+    // Initialize the dashboard with basic information
+    function initializeDashboard() {
+      // Set username
+      const username = localStorage.getItem('username') || 'User';
+      const welcomeName = document.getElementById('welcome-name');
+      const usernameDisplay = document.getElementById('username-display');
+      const userNameDropdown = document.getElementById('user-name-dropdown');
+      const userEmailDropdown = document.getElementById('user-email-dropdown');
+      const userAvatar = document.getElementById('user-avatar');
+      
+      if (welcomeName) welcomeName.textContent = username;
+      if (usernameDisplay) usernameDisplay.textContent = username;
+      if (userNameDropdown) userNameDropdown.textContent = username;
+      if (userAvatar) userAvatar.textContent = username.charAt(0).toUpperCase();
+    }
+    
+    // Fetch user profile data
+    async function fetchUserProfile() {
+      try {
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+        const token = localStorage.getItem('token');
+        
+        if (!token) return;
+        
+        const response = await fetch(`${API_URL}/api/users/me`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+        
+        const userData = await response.json();
+        
+        // Update user information in UI
+        const userEmailDropdown = document.getElementById('user-email-dropdown');
+        if (userEmailDropdown && userData.email) {
+          userEmailDropdown.textContent = userData.email;
+        }
+        
+        // Any additional profile info can be updated here
+        
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        showNotification('Failed to load your profile data', 'error');
+      }
+    }
+    
+    // Fetch tasks for dashboard
+    async function fetchTasks() {
+      try {
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        
+        if (!token || !userId) return;
+        
+        // First try to fetch from my-tasks endpoint
+        const response = await fetch(`${API_URL}/api/my-tasks`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch tasks');
+        }
+        
+        const tasks = await response.json();
+        
+        // Update dashboard with task data
+        updateDashboardStats(tasks);
+        updateRecentTasksList(tasks);
+        updateTasksTable(tasks);
+        updateAcceptedTasksView(tasks);
+        
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        
+        // Fallback to regular tasks endpoint
+        try {
+          const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+          const userId = localStorage.getItem('userId');
+          
+          const response = await fetch(`${API_URL}/api/tasks`);
+          
+          if (!response.ok) {
+            throw new Error('Failed to fetch tasks');
+          }
+          
+          const allTasks = await response.json();
+          
+          // Filter tasks created by the current user
+          const myTasks = allTasks.filter(task => task.userId == userId);
+          
+          // Update dashboard with task data
+          updateDashboardStats(myTasks);
+          updateRecentTasksList(myTasks);
+          updateTasksTable(myTasks);
+          updateAcceptedTasksView(allTasks);
+          
+        } catch (fallbackError) {
+          console.error('Error in fallback task loading:', fallbackError);
+          showNotification('Failed to load your tasks', 'error');
+          
+          // Show error states in UI
+          document.getElementById('my-tasks-error')?.classList.remove('hidden');
+          document.getElementById('recent-tasks-list').innerHTML = `
+            <div class="p-6 text-center">
+              <p class="text-gray-600">Failed to load tasks. Please try again.</p>
+            </div>
+          `;
+        }
+      }
+    }
+    
+    // Update dashboard statistics based on task data
+    function updateDashboardStats(tasks) {
+      // Count tasks by status
+      const postedTasksCount = tasks.length;
+      const inProgressCount = tasks.filter(task => task.status === 'In Progress').length;
+      const completedCount = tasks.filter(task => task.status === 'Completed').length;
+      
+      // Update count elements
+      document.getElementById('posted-tasks-count').textContent = postedTasksCount;
+      document.getElementById('in-progress-count').textContent = inProgressCount;
+      document.getElementById('completed-count').textContent = completedCount;
+      
+      // Also update task distribution chart if available
+      const openCount = tasks.filter(task => task.status === 'Open').length;
+      
+      const openTasksCount = document.getElementById('open-tasks-count');
+      const progressTasksCount = document.getElementById('progress-tasks-count');
+      const completedTasksCount = document.getElementById('completed-tasks-count');
+      
+      if (openTasksCount) openTasksCount.textContent = openCount;
+      if (progressTasksCount) progressTasksCount.textContent = inProgressCount;
+      if (completedTasksCount) completedTasksCount.textContent = completedCount;
+      
+      // Calculate percentages for bars
+      const total = tasks.length || 1; // Avoid division by zero
+      const openPercent = Math.round((openCount / total) * 100);
+      const progressPercent = Math.round((inProgressCount / total) * 100);
+      const completedPercent = Math.round((completedCount / total) * 100);
+      
+      // Update progress bars
+      const openTasksBar = document.getElementById('open-tasks-bar');
+      const progressTasksBar = document.getElementById('progress-tasks-bar');
+      const completedTasksBar = document.getElementById('completed-tasks-bar');
+      
+      if (openTasksBar) openTasksBar.style.width = `${openPercent}%`;
+      if (progressTasksBar) progressTasksBar.style.width = `${progressPercent}%`;
+      if (completedTasksBar) completedTasksBar.style.width = `${completedPercent}%`;
+    }
+    
+    // Update recent tasks list
+    function updateRecentTasksList(tasks) {
+      const recentTasksList = document.getElementById('recent-tasks-list');
+      
+      if (!recentTasksList) return;
+      
+      // Clear loading state
+      recentTasksList.innerHTML = '';
+      
+      // Sort by most recent and take top 5
+      const recentTasks = [...tasks]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
+        
+      if (recentTasks.length === 0) {
+        recentTasksList.innerHTML = `
+          <div class="p-6 text-center">
+            <p class="text-gray-600">You haven't posted any tasks yet.</p>
+            <a href="post-task.html" class="inline-flex items-center mt-3 text-primary hover:underline">
+              <i class="fas fa-plus-circle mr-1"></i> Create your first task
+            </a>
+          </div>
+        `;
+        return;
+      }
+      
+      // Create task items
+      recentTasks.forEach(task => {
+        const formattedDate = TaskUtils.formatDate(task.createdAt, true);
+        
+        // Determine status class
+        let statusClass = 'bg-green-50 text-green-600';
+        let statusIcon = 'fa-door-open';
+        
+        if (task.status === 'In Progress') {
+          statusClass = 'bg-yellow-50 text-yellow-600';
+          statusIcon = 'fa-spinner';
+        } else if (task.status === 'Completed') {
+          statusClass = 'bg-gray-50 text-gray-600';
+          statusIcon = 'fa-check-circle';
+        }
+        
+        const taskItem = document.createElement('div');
+        taskItem.className = 'p-4 flex items-start hover:bg-gray-50 transition-colors';
+        taskItem.innerHTML = `
+          <div class="w-10 h-10 rounded-lg ${statusClass} flex items-center justify-center mr-3">
+            <i class="fas ${statusIcon}"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between">
+              <a href="task-detail.html?id=${task.id}" class="font-medium hover:text-primary">${task.title}</a>
+              <span class="text-xs text-gray-500">${formattedDate}</span>
+            </div>
+            <p class="text-sm text-gray-600 line-clamp-1">${task.description}</p>
+            <div class="flex items-center text-xs text-gray-500 mt-1">
+              <span class="inline-flex items-center mr-3">
+                <i class="fas fa-map-marker-alt mr-1 opacity-70"></i>
+                ${task.location || 'Remote'}
+              </span>
+              ${task.budget ? `
+                <span class="inline-flex items-center">
+                  <i class="fas fa-rupee-sign mr-1 opacity-70"></i>
+                  ${task.budget}
+                </span>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        
+        recentTasksList.appendChild(taskItem);
+      });
+    }
+    
+    // Update tasks table
+    function updateTasksTable(tasks) {
+      const tasksTable = document.getElementById('my-tasks-table');
+      const tasksBody = document.getElementById('my-tasks-tbody');
+      const emptyState = document.getElementById('my-tasks-empty');
+      const errorState = document.getElementById('my-tasks-error');
+      
+      if (!tasksBody || !tasksTable) return;
+      
+      // Clear loading state
+      tasksBody.innerHTML = '';
+      
+      // Show empty state if no tasks
+      if (tasks.length === 0) {
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      // Sort tasks by most recent
+      const sortedTasks = [...tasks].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      // Create table rows
+      sortedTasks.forEach(task => {
+        const formattedDate = TaskUtils.formatDate(task.createdAt, true);
+        
+        // Determine status class
+        let statusClass = 'bg-green-50 text-green-600';
+        let statusIcon = 'fa-door-open';
+        
+        if (task.status === 'In Progress') {
+          statusClass = 'bg-yellow-50 text-yellow-600';
+          statusIcon = 'fa-spinner';
+        } else if (task.status === 'Completed') {
+          statusClass = 'bg-gray-50 text-gray-600';
+          statusIcon = 'fa-check-circle';
+        }
+        
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+        
+        row.innerHTML = `
+          <td class="px-6 py-4">
+            <div>
+              <a href="task-detail.html?id=${task.id}" class="font-medium hover:text-primary">${task.title}</a>
+              <p class="text-sm text-gray-600 line-clamp-1">${task.description}</p>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">${task.category || 'Other'}</td>
+          <td class="px-6 py-4 whitespace-nowrap">${task.budget ? `₹${task.budget}` : 'Negotiable'}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+              <i class="fas ${statusIcon} mr-1"></i> ${task.status}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${formattedDate}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+            <div class="flex justify-end space-x-2">
+              <a href="task-detail.html?id=${task.id}" class="text-primary hover:text-primary-dark">
+                <i class="fas fa-eye"></i>
+              </a>
+              ${task.status === 'Open' ? `
+                <button class="text-blue-600 hover:text-blue-800 edit-task-btn" data-task-id="${task.id}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="text-red-600 hover:text-red-800 delete-task-btn" data-task-id="${task.id}">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        
+        // Add event listeners for edit and delete buttons
+        tasksBody.appendChild(row);
+        
+        const editBtn = row.querySelector('.edit-task-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', () => {
+            window.location.href = `edit-task.html?id=${task.id}`;
+          });
+        }
+        
+        const deleteBtn = row.querySelector('.delete-task-btn');
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', () => {
+            confirmDeleteTask(task.id, task.title);
+          });
+        }
+      });
+    }
+    
+    // Update accepted tasks section
+    function updateAcceptedTasksView(tasks) {
+      const acceptedTasksContainer = document.getElementById('accepted-tasks-container');
+      const acceptedTasksEmpty = document.getElementById('accepted-tasks-empty');
+      
+      if (!acceptedTasksContainer) return;
+      
+      // Clear loading state
+      acceptedTasksContainer.innerHTML = '';
+      
+      // Get current user ID
+      const userId = localStorage.getItem('userId');
+      
+      // Filter for tasks accepted by the current user
+      const acceptedTasks = tasks.filter(task => 
+        task.acceptedById == userId && 
+        (task.status === 'In Progress' || task.status === 'Completed')
+      );
+      
+      // Show empty state if no accepted tasks
+      if (acceptedTasks.length === 0) {
+        if (acceptedTasksEmpty) acceptedTasksEmpty.classList.remove('hidden');
+        return;
+      }
+      
+      // Hide empty state
+      if (acceptedTasksEmpty) acceptedTasksEmpty.classList.add('hidden');
+      
+      // Create cards for each accepted task
+      acceptedTasks.forEach(task => {
+        // Create task card using the utility function if available
+        if (window.TaskUtils && typeof window.TaskUtils.createTaskCard === 'function') {
+          const taskCard = window.TaskUtils.createTaskCard(task, { showButtons: true });
+          acceptedTasksContainer.appendChild(taskCard);
+        } else {
+          // Fallback to simple card creation
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100';
+          
+          const statusClasses = getStatusClasses(task.status);
+          const formattedDate = formatDate(task.acceptedAt || task.updatedAt || task.createdAt, true);
+          
+          card.innerHTML = `
+            <div class="p-5">
+              <div class="flex justify-between items-start mb-3">
+                <h3 class="font-semibold text-lg">
+                  <a href="task-detail.html?id=${task.id}" class="hover:text-primary">${task.title}</a>
+                </h3>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusClasses.bg} ${statusClasses.text}">
+                  <i class="fas ${statusClasses.icon} mr-1"></i>${task.status}
+                </span>
+              </div>
+              <p class="text-gray-600 text-sm mb-4 line-clamp-2">${task.description}</p>
+              <div class="border-t border-gray-100 mt-4 pt-4">
+                <div class="flex justify-between">
+                  <span class="text-xs text-gray-500">Accepted ${formattedDate}</span>
+                  <a href="task-detail.html?id=${task.id}" class="text-primary text-sm hover:underline">View Details</a>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          acceptedTasksContainer.appendChild(card);
+        }
+      });
+    }
+    
+    // Show a notification using the notification utility or a fallback
+    function showNotification(message, type = 'info') {
+      // Use the notification utility if available
+      if (window.showNotification) {
+        window.showNotification(message, type);
+        return;
+      }
+      
+      // Fallback alert
+      alert(message);
+    }
+    
+    // Confirm task deletion
+    function confirmDeleteTask(taskId, taskTitle) {
+      if (confirm(`Are you sure you want to delete the task "${taskTitle}"? This action cannot be undone.`)) {
+        deleteTask(taskId);
+      }
+    }
+    
+    // Delete task
+    async function deleteTask(taskId) {
+      try {
+        const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_URL}/api/tasks/${taskId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete task');
+        }
+        
+        // Show success notification
+        showNotification('Task deleted successfully', 'success');
+        
+        // Refetch tasks to update the dashboard
+        fetchTasks();
+        
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        showNotification('Failed to delete task. Please try again.', 'error');
+      }
+    }
+    
+    // Format date helper function (fallback if TaskUtils is not available)
+    function formatDate(dateString, relative = false) {
+      if (window.TaskUtils && typeof window.TaskUtils.formatDate === 'function') {
+        return window.TaskUtils.formatDate(dateString, relative);
+      }
+      
+      if (!dateString) return 'N/A';
+      
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+      
+      if (relative) {
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+      }
+      
+      return date.toLocaleDateString();
+    }
+    
+    // Get status CSS classes (fallback if TaskUtils is not available)
+    function getStatusClasses(status) {
+      if (window.TaskUtils && typeof window.TaskUtils.getStatusClasses === 'function') {
+        return window.TaskUtils.getStatusClasses(status);
+      }
+      
+      switch (status) {
+        case 'Open':
+          return {
+            bg: 'bg-green-50',
+            text: 'text-green-600',
+            icon: 'fa-door-open'
+          };
+        case 'In Progress':
+          return {
+            bg: 'bg-yellow-50',
+            text: 'text-yellow-600',
+            icon: 'fa-spinner'
+          };
+        case 'Completed':
+          return {
+            bg: 'bg-gray-50',
+            text: 'text-gray-600',
+            icon: 'fa-check-circle'
+          };
+        default:
+          return {
+            bg: 'bg-gray-50',
+            text: 'text-gray-600',
+            icon: 'fa-question-circle'
+          };
+      }
+    }
+    
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      
+      window.location.href = 'login.html?message=You have been logged out';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Status - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 pt-16">
+  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl" href="index.html">
+          Victor
+        </a>
+        <button class="md:hidden border-0" type="button" id="mobile-menu-button">
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+        </button>
+        <div class="hidden md:flex" id="navbar-menu">
+          <ul class="flex space-x-2">
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="index.html">Home</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="tasks.html">Browse Tasks</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="post-task.html">Post a Task</a>
+            </li>
+            <!-- User dropdown (hidden by default, shown when logged in) -->
+            <li class="relative hidden" id="user-menu-item">
+              <button class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md flex items-center" id="user-menu-button">
+                <i class="fas fa-user-circle mr-1"></i>
+                <span id="username-display">User</span>
+                <i class="fas fa-chevron-down ml-1 text-xs"></i>
+              </button>
+              <ul class="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg py-2 w-48 hidden" id="user-dropdown">
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="dashboard.html"><i class="fas fa-tachometer-alt w-5 mr-2"></i>Dashboard</a></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="profile.html"><i class="fas fa-user w-5 mr-2"></i>My Profile</a></li>
+                <li class="border-t border-gray-200 my-1"></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="#" id="logout-button"><i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout</a></li>
+              </ul>
+            </li>
+            <!-- Login/Signup options (visible when logged out) -->
+            <li id="login-menu-item">
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="login.html">Login</a>
+            </li>
+            <li id="signup-menu-item">
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="signup.html">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="flex-grow container mx-auto px-4 py-8">
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">API Server Status</h1>
+        <a href="dashboard.html" class="text-primary hover:underline">
+          <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+      </div>
+      <div id="status-loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 mb-0 text-muted">Checking server status...</p>
+      </div>
+      <div id="status-results" class="pt-3 pb-2" style="display:none;">
+        <div class="mb-4">
+          <div class="d-flex align-items-center mb-3">
+            <div id="status-icon" class="me-3">
+              <i class="fas fa-circle text-success fa-2x"></i>
+            </div>
+            <div>
+              <h4 id="status-message" class="mb-0">Server is online</h4>
+              <p id="status-time" class="text-muted mb-0">Last checked: just now</p>
+            </div>
+          </div>
+        </div>
+        <table class="table">
+          <tbody id="server-details"></tbody>
+        </table>
+      </div>
+      <div id="connection-test" class="mt-4 pt-4 border-top" style="display:none;">
+        <h6 class="mb-3">Test API Endpoints</h6>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="endpoints-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-top">
+        <h6 class="mb-3">API URL Configuration</h6>
+        <div class="input-group mb-3">
+          <input type="text" id="api-url-input" class="form-control" placeholder="http://localhost:9000">
+          <button class="btn btn-primary" type="button" id="save-url-btn">Save</button>
+        </div>
+        <div id="api-url-message" class="small text-muted mb-3">
+          Current URL: <span id="current-url">Loading...</span>
+        </div>
+      </div>
+      <div class="mt-4 pt-4 border-top">
+        <h6 class="mb-3">User Authentication Status</h6>
+        <div id="auth-status-content" class="p-3 rounded bg-light">
+          Loading auth status...
+        </div>
+        <div class="mt-3">
+          <button class="btn btn-outline-secondary me-2 mb-2" id="clear-storage-btn">
+            <i class="fas fa-trash-alt me-1"></i> Clear Local Storage
+          </button>
+          <button class="btn btn-outline-primary me-2 mb-2" id="refresh-connection-btn">
+            <i class="fas fa-sync-alt me-1"></i> Refresh Connection
+          </button>
+          <button class="btn btn-outline-info mb-2" id="view-auth-btn">
+            <i class="fas fa-key me-1"></i> View Auth Data
+          </button>
+        </div>
+        <div class="mt-3" id="debug-output" style="display:none;">
+          <div class="border rounded p-3 bg-light">
+            <pre class="mb-0" id="debug-pre"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="bg-white shadow-sm py-4">
+    <div class="container mx-auto px-4 text-center">
+      <a href="index.html" class="text-primary hover:underline">Return to Home Page</a>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const apiUrl = window.API_CONFIG ? window.API_CONFIG.API_URL : localStorage.getItem('api_url') || 'http://localhost:9000';
+      document.getElementById('api-url-input').value = apiUrl;
+      document.getElementById('current-url').textContent = apiUrl;
+      checkServerStatus();
+      document.getElementById('save-url-btn').addEventListener('click', function() {
+        const newUrl = document.getElementById('api-url-input').value.trim();
+        if (newUrl) {
+          localStorage.setItem('api_url', newUrl);
+          document.getElementById('current-url').textContent = newUrl;
+          const message = document.getElementById('api-url-message');
+          message.innerHTML = `URL saved! <span class="text-success">Checking connection...</span>`;
+          setTimeout(() => {
+            checkServerStatus();
+          }, 500);
+        }
+      });
+      document.getElementById('clear-storage-btn').addEventListener('click', function() {
+        localStorage.clear();
+        document.getElementById('debug-pre').textContent = 'Local storage cleared!';
+        document.getElementById('debug-output').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('debug-output').style.display = 'none';
+        }, 3000);
+      });
+      document.getElementById('refresh-connection-btn').addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Refreshing...';
+        if (window.API_CONFIG && window.API_CONFIG.refreshConnection) {
+          window.API_CONFIG.refreshConnection().then(changed => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Refresh Connection';
+            if (changed) {
+              document.getElementById('api-url-input').value = window.API_CONFIG.API_URL;
+              document.getElementById('current-url').textContent = window.API_CONFIG.API_URL;
+              checkServerStatus();
+            }
+            document.getElementById('debug-pre').textContent = changed ? 'Connection refreshed! New URL: ' + window.API_CONFIG.API_URL : 'Connection unchanged. Current URL is working.';
+            document.getElementById('debug-output').style.display = 'block';
+          });
+        } else {
+          setTimeout(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Refresh Connection';
+            checkServerStatus();
+          }, 1000);
+        }
+      });
+      document.getElementById('view-auth-btn').addEventListener('click', function() {
+        const authData = {
+          hasToken: !!localStorage.getItem('token'),
+          username: localStorage.getItem('username') || 'Not set',
+          userId: localStorage.getItem('userId') || 'Not set',
+          tokenFirstChars: localStorage.getItem('token') ? localStorage.getItem('token').substring(0, 12) + '...' : 'No token'
+        };
+        document.getElementById('debug-pre').textContent = JSON.stringify(authData, null, 2);
+        document.getElementById('debug-output').style.display = 'block';
+      });
+      document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('test-endpoint-btn')) {
+          const endpoint = e.target.getAttribute('data-endpoint');
+          const statusCell = document.querySelector(`[data-status="${endpoint}"]`);
+          if (statusCell) {
+            statusCell.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+            testEndpoint(endpoint).then(result => {
+              if (result.success) {
+                statusCell.innerHTML = `<span class="badge bg-success">Working</span>`;
+              } else {
+                statusCell.innerHTML = `<span class="badge bg-danger">Failed</span>`;
+              }
+            });
+          }
+        }
+      });
+    });
+    async function checkServerStatus() {
+      const statusLoading = document.getElementById('status-loading');
+      const statusResults = document.getElementById('status-results');
+      const serverDetails = document.getElementById('server-details');
+      const connectionTest = document.getElementById('connection-test');
+      const endpointsBody = document.getElementById('endpoints-body');
+      statusLoading.style.display = 'block';
+      statusResults.style.display = 'none';
+      connectionTest.style.display = 'none';
+      try {
+        const apiUrl = document.getElementById('api-url-input').value.trim() || (window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000');
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const response = await fetch(`${apiUrl}/api/status`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          throw new Error(`Server responded with status: ${response.status}`);
+        }
+        const data = await response.json();
+        let statusHTML = `
+          <tr>
+            <th>Status</th>
+            <td><span class="badge bg-success">Online</span></td>
+          </tr>
+          <tr>
+            <th>API URL</th>
+            <td>${apiUrl}</td>
+          </tr>
+          <tr>
+            <th>Server Time</th>
+            <td>${data.time ? new Date(data.time).toLocaleString() : 'Not reported'}</td>
+          </tr>
+          <tr>
+            <th>Message</th>
+            <td>${data.message || 'No message provided'}</td>
+          </tr>
+        `;
+        serverDetails.innerHTML = statusHTML;
+        let endpointsHTML = '';
+        const endpoints = [
+          '/api/status',
+          '/api/tasks',
+          '/api/my-tasks',
+          '/api/user'
+        ];
+        endpoints.forEach(endpoint => {
+          endpointsHTML += `
+            <tr>
+              <td><code>${endpoint}</code></td>
+              <td data-status="${endpoint}"><span class="badge bg-secondary">Not tested</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary test-endpoint-btn" data-endpoint="${endpoint}">
+                  Test
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+        endpointsBody.innerHTML = endpointsHTML;
+        statusLoading.style.display = 'none';
+        statusResults.style.display = 'block';
+        connectionTest.style.display = 'block';
+      } catch (error) {
+        console.error('Error checking server status:', error);
+        serverDetails.innerHTML = `
+          <tr>
+            <th>Status</th>
+            <td><span class="badge bg-danger">Offline</span></td>
+          </tr>
+          <tr>
+            <th>Error</th>
+            <td>${error.name === 'AbortError' ? 'Connection timeout' : error.message}</td>
+          </tr>
+          <tr>
+            <th>Suggestion</th>
+            <td>
+              <ul class="mb-0">
+                <li>Check if the server is running</li>
+                <li>Verify the API URL is correct</li>
+                <li>Check for CORS issues in your browser console</li>
+                <li>Try using port 9000 instead of 3000</li>
+              </ul>
+            </td>
+          </tr>
+        `;
+        statusLoading.style.display = 'none';
+        statusResults.style.display = 'block';
+        connectionTest.style.display = 'none';
+      }
+    }
+    async function testEndpoint(endpoint) {
+      try {
+        const apiUrl = document.getElementById('api-url-input').value.trim() || (window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000');
+        const token = localStorage.getItem('token');
+        const headers = token && endpoint !== '/api/status' ? { 'Authorization': `Bearer ${token}` } : {};
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const response = await fetch(`${apiUrl}${endpoint}`, {
+          headers,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        return {
+          success: response.ok,
+          status: response.status
+        };
+      } catch (error) {
+        console.error(`Error testing endpoint ${endpoint}:`, error);
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+    }
+  </script>
+</body>
+</html>

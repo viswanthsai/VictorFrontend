@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Details - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 pt-16">
+  <!-- Header (navbar) -->
+  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl" href="index.html">
+          Victor
+        </a>
+        <button class="md:hidden border-0" type="button" id="mobile-menu-button">
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+        </button>
+        <div class="hidden md:flex" id="navbar-menu">
+          <ul class="flex space-x-2">
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="index.html">Home</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="tasks.html">Browse Tasks</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="post-task.html">Post a Task</a>
+            </li>
+            <!-- User dropdown (hidden by default, shown when logged in) -->
+            <li class="relative hidden" id="user-menu-item">
+              <button class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md flex items-center" id="user-menu-button">
+                <i class="fas fa-user-circle mr-1"></i>
+                <span id="username-display">User</span>
+                <i class="fas fa-chevron-down ml-1 text-xs"></i>
+              </button>
+              <ul class="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg py-2 w-48 hidden" id="user-dropdown">
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="dashboard.html"><i class="fas fa-tachometer-alt w-5 mr-2"></i>Dashboard</a></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="profile.html"><i class="fas fa-user w-5 mr-2"></i>My Profile</a></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="accepted-tasks.html"><i class="fas fa-check-circle w-5 mr-2"></i>Accepted Tasks</a></li>
+                <li class="border-t border-gray-200 my-1"></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="#" id="logout-button"><i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout</a></li>
+              </ul>
+            </li>
+            <!-- Login/Signup options (visible when logged out) -->
+            <li id="login-menu-item">
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="login.html">Login</a>
+            </li>
+            <li id="signup-menu-item">
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="signup.html">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="flex-grow py-8">
+    <div class="container mx-auto px-4">
+      <!-- Task Detail Content -->
+      <div id="task-detail-container">
+        <!-- Loading State -->
+        <div id="loading
+      <!-- Breadcrumbs -->
+      <div class="mb-6">
+        <div class="text-sm text-gray-500 flex items-center">
+          <a href="index.html" class="hover:text-primary">Home</a>
+          <i class="fas fa-chevron-right mx-2 text-xs"></i>
+          <a href="tasks.html" class="hover:text-primary">Tasks</a>
+          <i class="fas fa-chevron-right mx-2 text-xs"></i>
+          <span id="task-breadcrumb-title" class="truncate max-w-xs">Task Details</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="task-loading" class="flex flex-col items-center justify-center py-20">
+        <div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-gray-500">Loading task details...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="task-error" class="bg-red-50 rounded-lg p-6 text-center hidden">
+        <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
+        <h2 class="text-xl font-bold mb-2">Task Not Found</h2>
+        <p class="text-gray-600 mb-6">The task you're looking for doesn't exist or has been removed.</p>
+        <a href="tasks.html" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition">
+          Browse Available Tasks
+        </a>
+      </div>
+
+      <!-- Task Content -->
+      <div id="task-content" class="hidden">
+        <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+          <!-- Main Content Column -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Task Header -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+              <div class="p-6 md:p-8">
+                <div class="flex flex-wrap justify-between items-start gap-4 mb-6">
+                  <h1 id="task-title" class="text-2xl md:text-3xl font-bold">Task Title</h1>
+                  <span id="task-status" class="inline-block px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-success">Open</span>
+                </div>
+                
+                <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-8">
+                  <div class="flex items-center">
+                    <i class="fas fa-calendar mr-2 opacity-70"></i>
+                    <span id="task-date">Posted on June 15, 2023</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-map-marker-alt mr-2 opacity-70"></i>
+                    <span id="location-name">Vijayawada</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-tag mr-2 opacity-70"></i>
+                    <span id="category-name">Delivery</span>
+                  </div>
+                </div>
+                
+                <h3 class="text-lg font-semibold mb-3">Description</h3>
+                <div id="task-description" class="text-gray-700 whitespace-pre-line">
+                  Loading task description...
+                </div>
+                
+                <!-- Status Update Section (Only visible to task owner) -->
+                <div id="status-update-section" class="mt-8 pt-6 border-t border-gray-200 hidden">
+                  <h3 class="text-lg font-semibold mb-4">Update Task Status</h3>
+                  <form id="update-status-form" class="flex flex-wrap gap-4 items-center">
+                    <div class="flex-grow min-w-[200px]">
+                      <select id="status-select" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary focus:border-primary">
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition">
+                      Update Status
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4">
+              <a href="tasks.html" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 rounded-lg transition">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Tasks
+              </a>
+              <a href="post-task.html" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg transition">
+                <i class="fas fa-plus mr-2"></i>Post Similar Task
+              </a>
+            </div>
+          </div>
+          
+          <!-- Sidebar Column -->
+          <div class="lg:col-span-1 mt-8 lg:mt-0">
+            <div class="lg:sticky lg:top-24 space-y-6">
+              <!-- Budget Info -->
+              <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-4">Budget</h3>
+                  <p id="task-budget" class="text-2xl font-bold text-primary">₹500</p>
+                </div>
+              </div>
+              
+              <!-- Poster Info -->
+              <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-4">Posted By</h3>
+                  <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl mr-4">
+                      <span id="poster-initials">JD</span>
+                    </div>
+                    <div>
+                      <div id="poster-name" class="font-medium">John Doe</div>
+                      <div class="text-sm text-gray-500">Task Poster</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Similar Tasks -->
+              <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                  <h3 class="text-lg font-semibold mb-4">Similar Tasks</h3>
+                  <div id="similar-tasks-container" class="space-y-4">
+                    <div class="animate-pulse">
+                      <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                    <div class="animate-pulse">
+                      <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                    <div class="animate-pulse">
+                      <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-white border-t border-gray-200 mt-auto">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-600 mb-4 md:mb-0">© 2023 Victor - Connect for Tasks. All rights reserved.</p>
+        <ul class="flex space-x-6">
+          <li><a href="privacy-policy.html" class="text-gray-600 hover:text-primary">Privacy Policy</a></li>
+          <li><a href="#" class="text-gray-600 hover:text-primary">Terms of Service</a></li>
+          <li><a href="server-status.html" class="text-gray-600 hover:text-primary">Server Status</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get API URL from config
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('navbar-menu').classList.toggle('hidden');
+      });
+      
+      // User dropdown toggle
+      const userMenuButton = document.getElementById('user-menu-button');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuButton && userDropdown) {
+        userMenuButton.addEventListener('click', function() {
+          userDropdown.classList.toggle('hidden');
+        });
+  
+        // Close the dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+      
+      // Check login status
+      checkLoginStatus();
+      
+      // Get task ID from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const taskId = urlParams.get('id');
+      
+      if (taskId) {
+        loadTaskDetails(taskId);
+      } else {
+        // No task ID provided, show error
+        document.getElementById('task-loading').style.display = 'none';
+        document.getElementById('task-error').classList.remove('hidden');
+      }
+    });
+    
+    // Check if user is logged in
+    function checkLoginStatus() {
+      const isLoggedIn = localStorage.getItem('token') !== null;
+      
+      const loginMenuItem = document.getElementById('login-menu-item');
+      const signupMenuItem = document.getElementById('signup-menu-item');
+      const userMenuItem = document.getElementById('user-menu-item');
+      
+      if (isLoggedIn) {
+        if (loginMenuItem) loginMenuItem.classList.add('hidden');
+        if (signupMenuItem) signupMenuItem.classList.add('hidden');
+        
+        if (userMenuItem) {
+          userMenuItem.classList.remove('hidden');
+          
+          // Display username if available
+          const username = localStorage.getItem('username') || 'User';
+          const usernameDisplay = document.getElementById('username-display');
+          if (usernameDisplay) {
+            usernameDisplay.textContent = username;
+          }
+        }
+        
+        // Setup logout button
+        const logoutButton = document.getElementById('logout-button');
+        if (logoutButton) {
+          logoutButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+          });
+        }
+      } else {
+        if (loginMenuItem) loginMenuItem.classList.remove('hidden');
+        if (signupMenuItem) signupMenuItem.classList.remove('hidden');
+        if (userMenuItem) userMenuItem.classList.add('hidden');
+      }
+    }
+    
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      window.location.href = 'index.html';
+    }
+    
+    // Load task details
+    async function loadTaskDetails(taskId) {
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      const taskLoading = document.getElementById('task-loading');
+      const taskContent = document.getElementById('task-content');
+      const taskError = document.getElementById('task-error');
+      
+      try {
+        // Setup timeout for the request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        // Fetch task details
+        const response = await fetch(`${API_URL}/api/tasks/${taskId}`, {
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to load task: ${response.statusText}`);
+        }
+        
+        const task = await response.json();
+        
+        // Update page title
+        document.title = `${task.title} - Task Details - Victor`;
+        
+        // Populate task details
+        document.getElementById('task-title').textContent = task.title;
+        document.getElementById('task-description').textContent = task.description;
+        document.getElementById('category-name').textContent = task.category;
+        document.getElementById('location-name').textContent = task.location || 'Remote';
+        document.getElementById('task-date').textContent = `Posted on ${formatDate(task.createdAt)}`;
+        document.getElementById('task-budget').textContent = task.budget ? `₹${task.budget}` : 'Negotiable';
+        document.getElementById('task-breadcrumb-title').textContent = task.title;
+        
+        // Update poster info
+        document.getElementById('poster-name').textContent = task.createdBy || 'Anonymous User';
+        
+        // Set poster initials
+        if (task.createdBy) {
+          const names = task.createdBy.split(' ');
+          let initials = '';
+          if (names.length >= 2) {
+            initials = names[0][0] + names[1][0];
+          } else if (names.length === 1) {
+            initials = names[0].substring(0, 2);
+          } else {
+            initials = 'UN';
+          }
+          document.getElementById('poster-initials').textContent = initials.toUpperCase();
+        }
+        
+        // Update status badge
+        const taskStatus = document.getElementById('task-status');
+        switch(task.status) {
+          case 'Open':
+            taskStatus.className = 'inline-block px-3 py-1 rounded-full text-sm font-medium bg-green-50 text-success';
+            break;
+          case 'In Progress':
+            taskStatus.className = 'inline-block px-3 py-1 rounded-full text-sm font-medium bg-yellow-50 text-warning';
+            break;
+          case 'Completed':
+            taskStatus.className = 'inline-block px-3 py-1 rounded-full text-sm font-medium bg-gray-50 text-gray-600';
+            break;
+        }
+        taskStatus.textContent = task.status;
+        
+        // Check if current user is the task owner
+        const userId = localStorage.getItem('userId');
+        if (userId && parseInt(userId) === task.userId) {
+          // Show status update section
+          document.getElementById('status-update-section').classList.remove('hidden');
+          
+          // Set current status in dropdown
+          document.getElementById('status-select').value = task.status;
+          
+          // Handle status update form submission
+          document.getElementById('update-status-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateTaskStatus(taskId, document.getElementById('status-select').value);
+          });
+        }
+        
+        // Load similar tasks
+        loadSimilarTasks(task.category, taskId);
+        
+        // Hide loading, show content
+        taskLoading.style.display = 'none';
+        taskContent.classList.remove('hidden');
+        
+      } catch (error) {
+        console.error('Error loading task details:', error);
+        
+        // Show error state
+        taskLoading.style.display = 'none';
+        taskContent.classList.add('hidden');
+        taskError.classList.remove('hidden');
+      }
+    }
+    
+    // Update task status
+    async function updateTaskStatus(taskId, status) {
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('You must be logged in to update task status');
+        }
+        
+        // Show loading state
+        const submitBtn = document.querySelector('#update-status-form button');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+        
+        // Make API request to update task status
+        const response = await fetch(`${API_URL}/api/tasks/${taskId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Failed to update task status');
+        }
+        
+        // Success! Reload the task details to reflect the changes
+        setTimeout(() => {
+          loadTaskDetails(taskId);
+          // Re-enable the submit button
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Update Status';
+        }, 500);
+        
+        // Show success toast or message
+        showNotification('Task status updated successfully!', 'success');
+      } catch (error) {
+        console.error('Error updating task status:', error);
+        
+        // Re-enable the submit button
+        const submitBtn = document.querySelector('#update-status-form button');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Update Status';
+        }
+        
+        // Show error message
+        showNotification(error.message || 'Failed to update task status', 'error');
+      }
+    }
+    
+    // Load similar tasks
+    async function loadSimilarTasks(category, currentTaskId) {
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      const similarTasksContainer = document.getElementById('similar-tasks-container');
+      
+      if (!similarTasksContainer || !category) return;
+      
+      try {
+        // Fetch all tasks
+        const response = await fetch(`${API_URL}/api/tasks`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to load similar tasks');
+        }
+        
+        const tasks = await response.json();
+        
+        // Filter tasks: same category, not the current task, limit to 3
+        const similarTasks = tasks
+          .filter(task => task.category === category && task.id != currentTaskId)
+          .slice(0, 3);
+        
+        if (similarTasks.length === 0) {
+          similarTasksContainer.innerHTML = '<p class="text-gray-500">No similar tasks found</p>';
+          return;
+        }
+        
+        // Clear container and add similar tasks
+        similarTasksContainer.innerHTML = '';
+        
+        similarTasks.forEach(task => {
+          // Create a task card for each similar task
+          const taskElement = document.createElement('div');
+          taskElement.className = 'border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:pb-0';
+          
+          // Task status badge classes
+          let statusClass = '';
+          switch(task.status) {
+            case 'Open':
+              statusClass = 'bg-green-50 text-success';
+              break;
+            case 'In Progress':
+              statusClass = 'bg-yellow-50 text-warning';
+              break;
+            case 'Completed':
+              statusClass = 'bg-gray-50 text-gray-600';
+              break;
+          }
+          
+          taskElement.innerHTML = `
+            <a href="task-detail.html?id=${task.id}" class="text-sm font-medium text-gray-900 hover:text-primary">${task.title}</a>
+            <div class="flex items-center mt-1.5 text-xs">
+              <span class="inline-block px-2 py-0.5 rounded-full ${statusClass}">${task.status}</span>
+              <span class="mx-2">·</span>
+              <span class="text-gray-500">${formatDate(task.createdAt, true)}</span>
+            </div>
+          `;
+          
+          similarTasksContainer.appendChild(taskElement);
+        });
+        
+      } catch (error) {
+        console.error('Error loading similar tasks:', error);
+        similarTasksContainer.innerHTML = '<p class="text-gray-500">Failed to load similar tasks</p>';
+      }
+    }
+    
+    // Format date helper function
+    function formatDate(dateString, isShort = false) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+      
+      if (isShort) {
+        // Short format for similar tasks section
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        return date.toLocaleDateString();
+      } else {
+        // Full format for main task display
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return `Posted on ${date.toLocaleDateString(undefined, options)}`;
+      }
+    }
+    
+    // Show notification toast
+    function showNotification(message, type = 'info') {
+      // Create notification element if it doesn't exist
+      let notificationContainer = document.getElementById('notification-container');
+      
+      if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        notificationContainer.className = 'fixed bottom-4 right-4 z-50';
+        document.body.appendChild(notificationContainer);
+      }
+      
+      // Create the notification toast
+      const toast = document.createElement('div');
+      toast.className = `mb-3 p-4 rounded-lg shadow-lg flex items-center max-w-xs animate-fade-in ${
+        type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' :
+        type === 'error' ? 'bg-red-50 text-red-800 border border-red-200' :
+        'bg-blue-50 text-blue-800 border border-blue-200'
+      }`;
+      
+      // Icon based on notification type
+      const icon = 
+        type === 'success' ? 'fas fa-check-circle text-green-500' :
+        type === 'error' ? 'fas fa-exclamation-circle text-red-500' :
+        'fas fa-info-circle text-blue-500';
+      
+      toast.innerHTML = `
+        <i class="${icon} mr-2 text-lg"></i>
+        <div class="flex-1">${message}</div>
+        <button class="ml-2 text-gray-400 hover:text-gray-600 focus:outline-none">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      
+      // Add to container
+      notificationContainer.appendChild(toast);
+      
+      // Add click event to close button
+      toast.querySelector('button').addEventListener('click', () => {
+        toast.remove();
+      });
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (toast.parentNode) {
+          // Add fade-out animation
+          toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 5000);
+    }
+  </script>
+  
+  <!-- Add a simple fade-in animation -->
+  <style>
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</body>
+</html>

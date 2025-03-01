@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <script src="server.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 pt-16">
+  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <!-- Standard navigation header - same as other pages -->
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl" href="index.html">
+          Victor
+        </a>
+        <button class="md:hidden border-0" type="button" id="mobile-menu-button">
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+        </button>
+        <div class="hidden md:flex" id="navbar-menu">
+          <ul class="flex space-x-2">
+            <li><a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="index.html">Home</a></li>
+            <li><a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="tasks.html">Browse Tasks</a></li>
+            <li><a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="post-task.html">Post a Task</a></li>
+            <li class="relative hidden" id="user-menu-item">
+              <button class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md flex items-center" id="user-menu-button">
+                <i class="fas fa-user-circle mr-1"></i>
+                <span id="username-display">User</span>
+                <i class="fas fa-chevron-down ml-1 text-xs"></i>
+              </button>
+              <ul class="absolute right-0 mt-2 bg-white border rounded-lg shadow-lg py-2 w-48 hidden" id="user-dropdown">
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="dashboard.html"><i class="fas fa-tachometer-alt w-5 mr-2"></i>Dashboard</a></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="profile.html"><i class="fas fa-user w-5 mr-2"></i>My Profile</a></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="accepted-tasks.html"><i class="fas fa-check-circle w-5 mr-2"></i>Accepted Tasks</a></li>
+                <li class="border-t border-gray-200 my-1"></li>
+                <li><a class="px-4 py-2 hover:bg-gray-100 flex items-center" href="#" id="logout-button"><i class="fas fa-sign-out-alt w-5 mr-2"></i>Logout</a></li>
+              </ul>
+            </li>
+            <!-- Login/Signup options (visible when logged out) -->
+            <li id="login-menu-item">
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="login.html">Login</a>
+            </li>
+            <li id="signup-menu-item">
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="signup.html">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow py-8">
+    <div class="container mx-auto px-4">
+      <h1 class="text-3xl font-bold mb-8">My Profile</h1>
+      
+      <!-- Profile loading spinner -->
+      <div id="profile-loading" class="text-center py-12">
+        <div class="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-gray-500">Loading your profile...</p>
+      </div>
+      
+      <!-- Profile content (hidden initially) -->
+      <div id="profile-content" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Left column: Profile info -->
+          <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+              <div class="flex items-center mb-6">
+                <div class="w-20 h-20 rounded-full bg-primary-light text-primary flex items-center justify-center text-xl font-bold mr-4" id="user-avatar">
+                  <!-- Initials will be inserted here -->
+                </div>
+                <div>
+                  <h2 class="text-2xl font-semibold" id="profile-name">Loading...</h2>
+                  <div class="text-gray-500" id="profile-email">loading@example.com</div>
+                  <div class="mt-2 text-sm">
+                    <span class="text-gray-500">Member since: </span>
+                    <span class="text-gray-700" id="join-date">Loading...</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Profile information -->
+              <div class="border-t border-gray-100 pt-6">
+                <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
+                    <div class="text-gray-800" id="display-name">Loading...</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Email Address</label>
+                    <div class="text-gray-800" id="display-email">Loading...</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+                    <div class="text-gray-800" id="display-phone">Not provided</div>
+                  </div>
+                  
+                  <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Location</label>
+                    <div class="text-gray-800" id="display-location">Not provided</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Edit Profile Button -->
+              <div class="mt-6">
+                <button id="edit-profile-btn" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition">
+                  <i class="fas fa-edit mr-2"></i>Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right column: Account stats -->
+          <div>
+            <div class="bg-white rounded-lg shadow-sm p-6">
+              <h3 class="text-lg font-semibold mb-4">Account Summary</h3>
+              
+              <div class="space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <div class="text-gray-600">Tasks Posted</div>
+                  <div class="font-semibold" id="tasks-posted-count">0</div>
+                </div>
+                
+                <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <div class="text-gray-600">Tasks Accepted</div>
+                  <div class="font-semibold" id="tasks-accepted-count">0</div>
+                </div>
+                
+                <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                  <div class="text-gray-600">Completed Tasks</div>
+                  <div class="font-semibold" id="tasks-completed-count">0</div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                  <div class="text-gray-600">Joined</div>
+                  <div class="font-semibold" id="member-since">-</div>
+                </div>
+              </div>
+              
+              <div class="mt-6">
+                <a href="dashboard.html" class="text-primary hover:text-primary-dark block text-center">
+                  <i class="fas fa-tachometer-alt mr-2"></i>Go to Dashboard
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-white border-t border-gray-200 mt-auto">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-600 mb-4 md:mb-0">© 2023 Victor - Connect for Tasks. All rights reserved.</p>
+        <ul class="flex space-x-6">
+          <li><a href="#" class="text-gray-600 hover:text-primary">Privacy Policy</a></li>
+          <li><a href="#" class="text-gray-600 hover:text-primary">Terms of Service</a></li>
+          <li><a href="server-status.html" class="text-gray-600 hover:text-primary">Server Status</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if user is logged in
+      if (!checkLoginStatus()) {
+        // Redirect to login page if not authenticated
+        window.location.href = 'login.html?redirect=profile.html&message=Please login to view your profile';
+        return;
+      }
+      
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('navbar-menu').classList.toggle('hidden');
+      });
+      
+      // User dropdown toggle
+      const userMenuButton = document.getElementById('user-menu-button');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userMenuButton && userDropdown) {
+        userMenuButton.addEventListener('click', function() {
+          userDropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+          if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+      
+      // Load user profile data
+      loadUserProfile();
+      
+      // Set up edit profile button
+      document.getElementById('edit-profile-btn').addEventListener('click', function() {
+        // Redirect to edit profile page or show edit form
+        alert('Edit profile functionality will be implemented soon');
+      });
+    });
+    
+    // Check login status and update UI
+    function checkLoginStatus() {
+      const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username');
+      
+      if (!token) {
+        return false;
+      }
+      
+      // Update UI for logged-in state
+      document.getElementById('login-menu-item').classList.add('hidden');
+      document.getElementById('signup-menu-item').classList.add('hidden');
+      document.getElementById('user-menu-item').classList.remove('hidden');
+      
+      // Display username if available
+      if (username) {
+        document.getElementById('username-display').textContent = username;
+      }
+      
+      // Setup logout button
+      document.getElementById('logout-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        logout();
+      });
+      
+      return true;
+    }
+    
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userEmail');
+      window.location.href = 'login.html?message=You have been logged out successfully';
+    }
+    
+    // Load user profile data
+    async function loadUserProfile() {
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        console.error('Authentication data missing');
+        return;
+      }
+      
+      try {
+        // Show loading spinner
+        document.getElementById('profile-loading').classList.remove('hidden');
+        document.getElementById('profile-content').classList.add('hidden');
+        
+        // Fetch user profile data - first try user-specific endpoint
+        let userData = null;
+        
+        try {
+          const response = await fetch(`${API_URL}/api/users/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to load profile data');
+          }
+          
+          userData = await response.json();
+        } catch (error) {
+          console.warn('Failed to fetch from user endpoint, using local data as fallback');
+          
+          // Use data from localStorage as fallback
+          userData = {
+            id: userId,
+            fullname: localStorage.getItem('username') || 'User',
+            email: localStorage.getItem('userEmail') || 'No email available'
+          };
+        }
+        
+        // Hide loading, show content
+        document.getElementById('profile-loading').classList.add('hidden');
+        document.getElementById('profile-content').classList.remove('hidden');
+        
+        // Populate profile with user data - safely handle possibly undefined values
+        const fullname = userData.fullname || userData.name || localStorage.getItem('username') || 'User';
+        const email = userData.email || localStorage.getItem('userEmail') || 'No email available';
+        const joinDate = userData.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'Unknown';
+        const phone = userData.phone || 'Not provided';
+        const location = userData.location || 'Not provided';
+        
+        // Set user initials in avatar
+        const initials = fullname
+          .split(' ')
+          .map(name => name.charAt(0))
+          .slice(0, 2)
+          .join('')
+          .toUpperCase();
+        document.getElementById('user-avatar').textContent = initials || 'U';
+        
+        // Update profile elements
+        document.getElementById('profile-name').textContent = fullname;
+        document.getElementById('profile-email').textContent = email;
+        document.getElementById('join-date').textContent = joinDate;
+        document.getElementById('display-name').textContent = fullname;
+        document.getElementById('display-email').textContent = email;
+        document.getElementById('display-phone').textContent = phone;
+        document.getElementById('display-location').textContent = location;
+        document.getElementById('member-since').textContent = joinDate;
+        
+        // Load tasks stats
+        loadTaskStats(userId, token);
+        
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        
+        // Show error message
+        document.getElementById('profile-loading').innerHTML = `
+          <div class="bg-red-50 rounded-lg p-6 text-center">
+            <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
+            <h2 class="text-xl font-bold mb-2">Error Loading Profile</h2>
+            <p class="text-gray-600 mb-4">${error.message || 'Failed to load your profile data'}</p>
+            <button onclick="window.location.reload()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition">
+              Try Again
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    // Load task statistics
+    async function loadTaskStats(userId, token) {
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      
+      try {
+        // Fetch tasks
+        const response = await fetch(`${API_URL}/api/tasks`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to load tasks data');
+        }
+        
+        const tasks = await response.json();
+        
+        // Count user's tasks
+        const postedTasks = tasks.filter(task => task.userId == userId);
+        const acceptedTasks = tasks.filter(task => task.acceptedById == userId);
+        const completedTasks = tasks.filter(task => 
+          (task.userId == userId || task.acceptedById == userId) && 
+          task.status === 'Completed'
+        );
+        
+        // Update task counts
+        document.getElementById('tasks-posted-count').textContent = postedTasks.length;
+        document.getElementById('tasks-accepted-count').textContent = acceptedTasks.length;
+        document.getElementById('tasks-completed-count').textContent = completedTasks.length;
+        
+      } catch (error) {
+        console.error('Error loading task stats:', error);
+        
+        // Set default values on error
+        document.getElementById('tasks-posted-count').textContent = '0';
+        document.getElementById('tasks-accepted-count').textContent = '0';
+        document.getElementById('tasks-completed-count').textContent = '0';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50">
+  <header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl" href="index.html">
+          Victor
+        </a>
+        <button class="md:hidden border-0" type="button" id="mobile-menu-button">
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+        </button>
+        <div class="hidden md:flex" id="navbar-menu">
+          <ul class="flex space-x-2">
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="index.html">Home</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="tasks.html">Browse Tasks</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="post-task.html">Post a Task</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block border-b-2 border-primary" href="signup.html">Sign Up</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="login.html">Login</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow py-12">
+    <div class="container mx-auto px-4">
+      <div class="max-w-md mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">Create an Account</h1>
+        
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+          <div class="p-6 sm:p-8">
+            <form id="signup-form" class="space-y-6" novalidate>
+              <!-- Full Name -->
+              <div>
+                <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-user text-gray-400"></i>
+                  </div>
+                  <input type="text" id="fullname" name="fullname" required 
+                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+                    placeholder="Enter your full name">
+                  <div class="mt-1 text-xs text-red-500 hidden" id="fullname-error"></div>
+                </div>
+              </div>
+              
+              <!-- Email -->
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-envelope text-gray-400"></i>
+                  </div>
+                  <input type="email" id="email" name="email" required 
+                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+                    placeholder="Enter your email address">
+                  <div class="mt-1 text-xs text-red-500 hidden" id="email-error"></div>
+                </div>
+              </div>
+              
+              <!-- Password -->
+              <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-lock text-gray-400"></i>
+                  </div>
+                  <input type="password" id="password" name="password" required 
+                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+                    placeholder="Create a password (min. 6 characters)">
+                  <div class="mt-1 text-xs text-red-500 hidden" id="password-error"></div>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Password must be at least 6 characters long</p>
+              </div>
+              
+              <!-- Terms and Conditions -->
+              <div class="flex items-start">
+                <div class="flex items-center h-5">
+                  <input id="terms" name="terms" type="checkbox" required
+                    class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                </div>
+                <div class="ml-3 text-sm">
+                  <label for="terms" class="text-gray-600">I agree to the <a href="#" class="text-primary hover:underline">Terms of Service</a> and <a href="#" class="text-primary hover:underline">Privacy Policy</a></label>
+                </div>
+              </div>
+              
+              <div class="flex justify-center">
+                <button type="submit" class="bg-primary text-white font-medium py-2.5 px-6 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  <i class="fas fa-user-plus mr-2"></i>Sign Up
+                </button>
+              </div>
+            </form>
+            
+            <div id="form-message" class="mt-4 p-4 rounded-lg shadow-sm hidden">
+              <div class="flex items-center">
+                <i class="fas fa-check-circle text-success mr-3 text-2xl"></i>
+                <div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <p class="mt-4 text-center">Already have an account? <a href="login.html" class="text-primary hover:underline">Login here</a></p>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="mt-auto py-4 bg-gray-100 border-t">
+    <div class="container mx-auto text-center">
+      <p class="text-gray-600">&copy; 2023 Victor - Connect for Tasks</p>
+    </div>
+  </footer>
+  
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Victor</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Config script -->
+  <script src="js/config.js"></script>
+  <!-- Configure Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#1a73e8',
+              dark: '#1557b0',
+              light: '#e8f0fe',
+            },
+            secondary: '#5f6368',
+            success: '#0d904f',
+            warning: '#f9ab00',
+            danger: '#d93025',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50 pt-16">
+  <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
+    <div class="container mx-auto px-4">
+      <nav class="flex items-center justify-between py-3">
+        <a class="text-primary font-bold text-2xl" href="index.html">
+          Victor
+        </a>
+        <button class="md:hidden border-0" type="button" id="mobile-menu-button">
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+          <span class="block w-6 h-0.5 bg-gray-600 my-1.5"></span>
+        </button>
+        <div class="hidden md:flex" id="navbar-menu">
+          <ul class="flex space-x-2">
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="index.html">Home</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="tasks.html">Browse Tasks</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="post-task.html">Post a Task</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block border-b-2 border-primary" href="login.html">Login</a>
+            </li>
+            <li>
+              <a class="px-3 py-2 text-gray-700 font-medium hover:text-primary rounded-md block" href="signup.html">Sign Up</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-grow py-12">
+    <div class="container mx-auto px-4">
+      <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="p-6 md:p-8">
+          <h2 class="text-2xl font-bold mb-6 text-center">Login to Your Account</h2>
+          <form id="login-form" class="space-y-6">
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+              <input type="email" id="email" name="email" required 
+                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+                placeholder="you@example.com">
+            </div>
+            <div>
+              <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input type="password" id="password" name="password" required 
+                class="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" 
+                placeholder="Enter your password">
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox" 
+                  class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+              </div>
+              <div class="text-sm">
+                <a href="#" class="font-medium text-primary hover:text-primary-dark">Forgot your password?</a>
+              </div>
+            </div>
+            <div>
+              <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-medium py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+              </button>
+            </div>
+          </form>
+          <p class="mt-6 text-center text-sm text-gray-600">
+            Don't have an account? <a href="signup.html" class="font-medium text-primary hover:text-primary-dark">Sign up</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-white border-t border-gray-200 mt-auto">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-600 mb-4 md:mb-0">© 2023 Victor - Connect for Tasks. All rights reserved.</p>
+        <ul class="flex space-x-6">
+          <li><a href="#" class="text-gray-600 hover:text-primary">Privacy Policy</a></li>
+          <li><a href="#" class="text-gray-600 hover:text-primary">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get API URL from config
+      const API_URL = window.API_CONFIG ? window.API_CONFIG.API_URL : 'http://localhost:9000';
+      
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        document.getElementById('navbar-menu').classList.toggle('hidden');
+      });
+      
+      // Handle login form submission
+      document.getElementById('login-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        try {
+          const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to login');
+          }
+          
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('username', data.username);
+          localStorage.setItem('userId', data.userId);
+          
+          // Redirect to dashboard or previous page
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect') || 'dashboard.html';
+          window.location.href = redirect;
+          
+        } catch (error) {
+          console.error('Login error:', error);
+          alert(error.message || 'Failed to login. Please try again.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
