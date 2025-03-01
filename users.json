@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "fullname": "Demo User",
+    "email": "demo@example.com",
+    "password": "hashed_password_in_real_app",
+    "createdAt": "2023-06-20T08:30:00.000Z",
+    "role": "user"
+  },
+  {
+    "id": 2,
+    "fullname": "ViswanthSai",
+    "email": "viswanthsai62@gmail.com",
+    "password": "5e80c6f5653bd1c4133e4c51d4c0edda1914daa64298681eaa2ab487dab9178b",
+    "createdAt": "2025-02-28T18:15:16.900Z",
+    "role": "user"
+  },
+  {
+    "id": 3,
+    "fullname": "ViswanthG",
+    "email": "viswanthsai76@gmail.com",
+    "password": "5e80c6f5653bd1c4133e4c51d4c0edda1914daa64298681eaa2ab487dab9178b",
+    "createdAt": "2025-02-28T18:21:49.061Z",
+    "role": "user"
+  },
+  {
+    "id": 4,
+    "fullname": "Bot23",
+    "email": "bot23@gmail.com",
+    "password": "5e80c6f5653bd1c4133e4c51d4c0edda1914daa64298681eaa2ab487dab9178b",
+    "createdAt": "2025-03-01T04:47:08.888Z",
+    "role": "user"
+  },
+  {
+    "id": 5,
+    "fullname": "Viswa",
+    "email": "viswa@gmail.com",
+    "password": "$2b$10$5XXJS.T62uvg4UKMEMnWO.6k5MeXazhj82nb1F10XBw8fOwR/bAZy",
+    "createdAt": "2025-03-01T05:00:51.874Z",
+    "role": "user"
+  },
+  {
+    "id": 6,
+    "fullname": "ViswanthSai",
+    "email": "vis34@gmail.com",
+    "password": "6ee29f620ef790f2babcb1870f0fdba74c9f2509c3213b95da2508988910531f",
+    "createdAt": "2025-03-01T05:39:51.022Z",
+    "role": "user"
+  },
+  {
+    "id": 7,
+    "fullname": "Bhavani",
+    "email": "KamutamBhavani@gmail.com",
+    "password": "6ee29f620ef790f2babcb1870f0fdba74c9f2509c3213b95da2508988910531f",
+    "createdAt": "2025-03-01T05:58:31.583Z",
+    "role": "user"
+  },
+  {
+    "id": 8,
+    "fullname": "Viswa",
+    "email": "visw@gmail.com",
+    "password": "b0cb78caa240dedbc5f85a8e13550e82f379c875bbfb893e1c4cbf12f18d6a09",
+    "createdAt": "2025-03-01T06:38:31.658Z",
+    "role": "user"
+  },
+  {
+    "id": 9,
+    "fullname": "ViswanthSai",
+    "email": "viswanthsai34@gmail.com",
+    "password": "b0cb78caa240dedbc5f85a8e13550e82f379c875bbfb893e1c4cbf12f18d6a09",
+    "createdAt": "2025-03-01T07:02:54.260Z",
+    "role": "user"
+  }
+]
